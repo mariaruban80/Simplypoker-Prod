@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" sizes="32x32" href="spade_1.png">     
+  <link rel="shortcut icon" href="spade_1.png">  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Planning Poker | Create or Join Session</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+    :root {
+      --primary: #673ab7;
+      --primary-light: #e1d4f9;
+      --primary-dark: #5c33a4;
+      --primary-gradient: linear-gradient(135deg, #673ab7, #9c27b0);
+      --text: #2d2d2d;
+      --text-light: #5e5e5e;
+      --background: #f8f9fe;
+      --section-bg: #F8F9FE;
+      --card: #ffffff;
+      --card-hover: #f9f7fe;
+      --border: #e8e8e8;
+      --accent: #FF6B6B;
+      --success: #4CAF50;
+      --info: #2196F3;
+      --warning: #FF9800;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+      --border-radius-sm: 6px;
+      --border-radius-md: 10px;
+      --border-radius-lg: 16px;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+      color: var(--text);
+      line-height: 1.6;
+      background-color: var(--background);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    
+    header {
+      background-color: #ffffff;
+      box-shadow: var(--shadow-sm);
+      padding: 0.8rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    
+    .logo img {
+      width: 36px;
+      height: auto;
+      box-shadow: none;
+      border-radius: 0;
+    }
+    
+    .logo-text {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .header-buttons {
+      display: flex;
+      gap: 0.7rem;
+      align-items: center;
+    }
+    
+    .button {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      padding: 0.7rem 1.5rem;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      height: 40px;
+    }
+    
+    .primary-button {
+      background-color: var(--primary);
+      color: white;
+      box-shadow: 0 2px 4px rgba(103, 58, 183, 0.2);
+    }
+    
+    .primary-button:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .secondary-button {
+      background-color: white;
+      color: var(--text);
+      border: 1px solid #e5e7eb;
+    }
+    
+    .secondary-button:hover {
+      background-color: #f9fafb;
+    }
+    
+    .home-button {
+      background-color: #f3f4f6;
+      color: var(--text);
+    }
+    
+    .home-button:hover {
+      background-color: #e5e7eb;
+    }
+    
+    main {
+      padding-top: 72px;
+      min-height: calc(100vh - 72px);
+      display: flex;
+      justify-content: center;
+    }
+    
+    .content-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      max-width: 1400px;
+      height: calc(100vh - 72px);
+      padding: 2rem;
+      gap: 3rem;
+    }
+    
+    /* Innovative Left Panel Design */
+    .visual-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      height: 100%;
+      max-width: 650px;
+    }
+    
+    .agile-visualization {
+      width: 100%;
+      height: 500px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .concept-title {
+      margin-bottom: 0.5rem;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+    }
+    
+    .purple-underline {
+      display: block;
+      width: 60px;
+      height: 3px;
+      margin: 0.5rem auto 2rem;
+      background-color: var(--primary);
+      border-radius: 3px;
+    }
+    
+    .collaboration-diagram {
+      position: relative;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+    }
+    
+    .team-member {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: var(--shadow-md);
+      font-weight: 600;
+      color: var(--primary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .team-member:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-md);
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .team-member:nth-child(1) {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .team-member:nth-child(2) {
+      top: 15%;
+      right: 15%;
+    }
+    
+    .team-member:nth-child(3) {
+      top: 50%;
+      right: 0;
+    }
+    
+    .team-member:nth-child(4) {
+      bottom: 15%;
+      right: 15%;
+    }
+    
+    .team-member:nth-child(5) {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .team-member:nth-child(6) {
+      bottom: 15%;
+      left: 15%;
+    }
+    
+    .team-member:nth-child(7) {
+      top: 50%;
+      left: 0;
+    }
+    
+    .team-member:nth-child(8) {
+      top: 15%;
+      left: 15%;
+    }
+    
+    .central-node {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background-image: var(--primary-gradient);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 600;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.2rem;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+      z-index: 10;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      padding: 10px;
+    }
+    
+    .central-node:hover {
+      transform: translate(-50%, -50%) scale(1.1);
+      box-shadow: 0 15px 30px rgba(103, 58, 183, 0.3);
+    }
+    
+    .connection-line {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      height: 2px;
+      background-color: rgba(103, 58, 183, 0.2);
+      transform-origin: left center;
+    }
+    
+    .estimate-bubble {
+      position: absolute;
+      padding: 10px 16px;
+      background-color: white;
+      border-radius: 20px;
+      box-shadow: var(--shadow-md);
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--primary);
+      opacity: 0;
+      transform: scale(0);
+      transition: all 0.3s ease;
+      z-index: 5;
+    }
+    
+    .feature-text {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      color: var(--text-light);
+      font-size: 1rem;
+      text-align: center;
+      width: 90%;
+    }
+    
+    .feature-text span {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    /* Forms Container Styles */
+    .forms-container {
+      flex: 1;
+      max-width: 480px;
+    }
+    
+    .session-box {
+      background: white;
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-md);
+      padding: 2rem;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+    
+    .session-box.hidden {
+      display: none;
+    }
+    
+    .session-box h2 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.8rem;
+      color: var(--text);
+      font-weight: 600;
+      margin-bottom: 1.8rem;
+    }
+    
+    .green-underline {
+      display: block;
+      width: 60px;
+      height: 3px;
+      margin-top: 0.5rem;
+      background-color: var(--success);
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: var(--border-radius-sm);
+      font-size: 0.95rem;
+      box-sizing: border-box;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(103, 58, 183, 0.1);
+    }
+    
+    .scale-options {
+      margin-bottom: 1.5rem;
+    }
+    
+    .scale-options h3 {
+      font-size: 0.95rem;
+      margin-bottom: 0.8rem;
+      font-weight: 500;
+    }
+    
+    .radio-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.8rem;
+      cursor: pointer;
+    }
+    
+    .radio-group input[type="radio"] {
+      margin-right: 0.8rem;
+      cursor: pointer;
+      accent-color: var(--primary);
+      width: auto;
+    }
+    
+    .radio-group label {
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      margin: 1.5rem 0;
+      cursor: pointer;
+    }
+    
+    .checkbox-container input {
+      margin-right: 0.8rem;
+      cursor: pointer;
+      accent-color: var(--primary);
+      width: auto;
+    }
+    
+    .checkbox-container label {
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    
+    .action-button {
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      border-radius: 50px;
+      background-color: var(--primary);
+      color: white;
+      font-weight: 500;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .action-button:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 1200px) {
+      .content-container {
+        padding: 1.5rem;
+        gap: 1.5rem;
+      }
+      
+      .collaboration-diagram {
+        width: 320px;
+        height: 320px;
+      }
+      
+      .team-member {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .central-node {
+        width: 100px;
+        height: 100px;
+        font-size: 1rem;
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .content-container {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .visual-container {
+        width: 100%;
+        margin-bottom: 2rem;
+      }
+      
+      .forms-container {
+        width: 100%;
+      }
+      
+      .agile-visualization {
+        height: 400px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .header-buttons {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      
+      .button {
+        font-size: 0.85rem;
+        padding: 0.6rem 1rem;
+      }
+      
+      .collaboration-diagram {
+        width: 280px;
+        height: 280px;
+      }
+      
+      .team-member {
+        width: 45px;
+        height: 45px;
+        font-size: 0.9rem;
+      }
+      
+      .central-node {
+        width: 90px;
+        height: 90px;
+        font-size: 0.9rem;
+      }
+      
+      .feature-text {
+        font-size: 0.9rem;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      header {
+        padding: 0.8rem 1rem;
+      }
+      
+      .logo-text {
+        font-size: 1.1rem;
+      }
+      
+      .button {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.8rem;
+      }
+      
+      .agile-visualization {
+        height: 320px;
+      }
+      
+      .collaboration-diagram {
+        width: 240px;
+        height: 240px;
+      }
+      
+      .team-member {
+        width: 40px;
+        height: 40px;
+        font-size: 0.8rem;
+      }
+      
+      .central-node {
+        width: 80px;
+        height: 80px;
+        font-size: 0.8rem;
+      }
+      
+      .feature-text {
+        font-size: 0.85rem;
+      }
+      
+      .session-box {
+        padding: 1.5rem;
+      }
+    }
+
+/* Modal Styling */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-overlay.hidden {
+  display: none;
+}
+
+.modal-box {
+  background: var(--card);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-lg);
+  max-width: 400px;
+  padding: 2rem;
+  text-align: center;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.modal-box h3 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--primary);
+}
+
+.modal-box p {
+  font-size: 0.95rem;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.modal-btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.2s;
+}
+
+.modal-btn.primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.modal-btn.primary:hover {
+  background: var(--primary-dark);
+}
+
+.modal-btn.secondary {
+  background: #f3f4f6;
+  color: var(--text);
+}
+
+.modal-btn.secondary:hover {
+  background: #e5e7eb;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="spade_1.png" alt="Simply Poker" />
+   <span class="logo-text">Simply Poker</span>
+
+    </div>
+    <div class="header-buttons">
+      <a href="About.html" class="button home-button">
+        <i class="fas fa-home"></i> HOME
+      </a>
+      <button id="newSessionBtn" class="button primary-button">
+        <i class="fas fa-plus"></i> NEW SESSION
+      </button>
+      <button id="joinSessionBtn" class="button secondary-button">
+        <i class="fas fa-sign-in-alt"></i> JOIN SESSION
+      </button>    
+    </div>
+  </header>
+
+  <main>
+    <div class="content-container">
+      <div class="visual-container">
+        <h2 class="concept-title">Collaborative Estimation</h2>
+        <span class="purple-underline"></span>
+        <div class="agile-visualization" id="agileVisualization">
+          <div class="collaboration-diagram">
+            <div class="team-member" data-estimate="3">TM1</div>
+            <div class="team-member" data-estimate="5">TM2</div>
+            <div class="team-member" data-estimate="8">TM3</div>
+            <div class="team-member" data-estimate="5">TM4</div>
+            <div class="team-member" data-estimate="3">TM5</div>
+            <div class="team-member" data-estimate="5">TM6</div>
+            <div class="team-member" data-estimate="8">TM7</div>
+            <div class="team-member" data-estimate="3">TM8</div>
+            <div class="central-node">Planning<br>Poker</div>
+          </div>
+          
+          <p class="feature-text">Create a <span>collaborative environment</span> where team members can estimate together in real-time</p>
+        </div>
+      </div>
+      
+      <div class="forms-container">
+        <div class="session-box" id="createSessionBox">
+          <h2>Create new session<span class="green-underline"></span></h2>
+
+          <div class="form-group">
+            <label for="sessionNameInput">Session name *</label>
+            <input type="text" id="sessionNameInput" placeholder="Give your session a memorable name" />
+          </div>
+
+          <div class="form-group">
+            <label for="createNameInput">Your name *</label>
+            <input type="text" id="createNameInput" placeholder="How should we call you?" />
+          </div>
+
+          <div class="scale-options">
+            <h3>Choose your estimation scale:</h3>
+            
+            <div class="radio-group">
+              <input type="radio" name="scale" id="fibonacci" checked value="fibonacci" />
+              <label for="fibonacci">Fibonacci (0, 1, 2, 3, 5, 8, 13, 21...)</label>
+            </div>
+            <div class="radio-group">
+              <input type="radio" name="scale" id="shortFib" value="shortFib" />
+              <label for="shortFib">Short Fibonacci (0, ½, 1, 2, 3...)</label>
+            </div>
+            <div class="radio-group">
+              <input type="radio" name="scale" id="tshirt" value="tshirt" />
+              <label for="tshirt">T-Shirt Sizes (XXS, XS, S, M...)</label>
+            </div>
+            <div class="radio-group">
+              <input type="radio" name="scale" id="tshirtNum" value="tshirtNum" />
+              <label for="tshirtNum">T-Shirt & Numbers</label>
+            </div>
+            <div class="radio-group">
+              <input type="radio" name="scale" id="custom" value="custom" />
+              <label for="custom">Custom</label>
+            </div>
+          </div>
+
+          <div class="checkbox-container">
+            <input type="checkbox" id="allowManage" />
+            <label for="allowManage">Allow members to manage session</label>
+          </div> 
+
+          <button class="action-button" onclick="createRoom()">Start new session</button>
+        </div>
+        
+        <div class="session-box hidden" id="joinSessionBox">
+          <h2>Join a Session<span class="green-underline"></span></h2>
+          
+          <div class="form-group">
+            <label for="sessionIdInput">Session ID *</label>
+            <input type="text" id="sessionIdInput" placeholder="Enter the session ID you received" />
+          </div>
+          
+          <div class="form-group">
+            <label for="joinNameInput">Your name *</label>
+            <input type="text" id="joinNameInput" placeholder="How should we call you?" />
+          </div>
+
+          <div class="checkbox-container">
+  <input type="checkbox" id="allowJoinAsHost" />
+  <label for="allowJoinAsHost">Allow members to Join a session as Host</label>
+</div>
+          
+          <button class="action-button" onclick="joinRoom()">Join session</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <script>
+    // Add event listeners when the DOM is fully loaded
+    document.addEventListener("DOMContentLoaded", function() {
+      // Setup event listeners for the navigation buttons
+      document.getElementById("newSessionBtn").addEventListener("click", function() {
+        document.getElementById("createSessionBox").classList.remove("hidden");
+        document.getElementById("joinSessionBox").classList.add("hidden");
+      });
+      
+      document.getElementById("joinSessionBtn").addEventListener("click", function() {
+        document.getElementById("createSessionBox").classList.add("hidden");
+        document.getElementById("joinSessionBox").classList.remove("hidden");
+      });
+      
+      // Initialize the collaboration diagram
+      initCollaborationDiagram();
+    });
+    
+    // Function to initialize the collaboration diagram
+    function initCollaborationDiagram() {
+      const visualization = document.getElementById('agileVisualization');
+      if (!visualization) return;
+      
+      const teamMembers = visualization.querySelectorAll('.team-member');
+      const centralNode = visualization.querySelector('.central-node');
+      const diagram = visualization.querySelector('.collaboration-diagram');
+      
+      // Create connection lines between team members and central node
+      teamMembers.forEach((member, index) => {
+        const line = document.createElement('div');
+        line.className = 'connection-line';
+        
+        // Calculate the angle and position for this team member
+        const angle = (index * (360 / teamMembers.length)) * (Math.PI / 180);
+        const centerX = diagram.offsetWidth / 2;
+        const centerY = diagram.offsetHeight / 2;
+        const radius = centerX - 30; // Adjust based on member size
+        
+        // Calculate the length of the line
+        const lineLength = radius - 30; // Adjust to connect to central node
+        
+        // Position and rotate the line
+        line.style.width = `${lineLength}px`;
+        line.style.transform = `rotate(${angle}rad)`;
+        
+        // Add line to the diagram
+        diagram.appendChild(line);
+        
+        // Create estimate bubble for this member
+        const estimate = document.createElement('div');
+        estimate.className = 'estimate-bubble';
+        estimate.textContent = member.getAttribute('data-estimate');
+        estimate.id = `estimate-${index}`;
+        
+        // Position the estimate bubble
+        const bubbleX = Math.cos(angle) * (radius / 1.5);
+        const bubbleY = Math.sin(angle) * (radius / 1.5);
+        
+        estimate.style.left = `calc(50% + ${bubbleX}px - 20px)`;
+        estimate.style.top = `calc(50% + ${bubbleY}px - 15px)`;
+        
+        diagram.appendChild(estimate);
+        
+        // Add interaction to team members
+        member.addEventListener('click', function() {
+          // Show the corresponding estimate
+          const estimateBubble = document.getElementById(`estimate-${index}`);
+          if (estimateBubble) {
+            // Hide all other bubbles first
+            document.querySelectorAll('.estimate-bubble').forEach(bubble => {
+              bubble.style.opacity = '0';
+              bubble.style.transform = 'scale(0)';
+            });
+            
+            // Show this estimate
+            estimateBubble.style.opacity = '1';
+            estimateBubble.style.transform = 'scale(1)';
+          }
+          
+          // Highlight this team member
+          teamMembers.forEach(tm => {
+            tm.style.backgroundColor = '';
+            tm.style.color = '';
+            tm.style.transform = '';
+          });
+          
+          this.style.backgroundColor = 'var(--primary)';
+          this.style.color = 'white';
+          this.style.transform = 'scale(1.1)';
+        });
+      });
+      
+      // Add interaction to the central node
+      centralNode.addEventListener('click', function() {
+        // Show all estimates at once with a staggered animation
+        const estimates = diagram.querySelectorAll('.estimate-bubble');
+        
+        estimates.forEach((bubble, idx) => {
+          setTimeout(() => {
+            bubble.style.opacity = '1';
+            bubble.style.transform = 'scale(1)';
+          }, idx * 100);
+        });
+        
+        // Pulse animation for central node
+        this.animate([
+          { transform: 'translate(-50%, -50%) scale(1)' },
+          { transform: 'translate(-50%, -50%) scale(1.15)' },
+          { transform: 'translate(-50%, -50%) scale(1)' }
+        ], {
+          duration: 600,
+          iterations: 1
+        });
+      });
+      
+      // Start with a brief demonstration animation after a short delay
+      setTimeout(() => {
+        teamMembers[0].click();
+        
+        setTimeout(() => {
+          teamMembers[2].click();
+          
+          setTimeout(() => {
+            teamMembers[4].click();
+            
+            setTimeout(() => {
+              centralNode.click();
+            }, 1000);
+          }, 800);
+        }, 800);
+      }, 1000);
+    }
+    function createRoom() {
+  const name = document.getElementById("createNameInput").value.trim();
+  const sessionName = document.getElementById("sessionNameInput").value.trim();
+  
+  if (!name) {
+    alert("Please enter your name.");
+    return;
+  }
+  
+  if (!sessionName) {
+    alert("Please enter a session name.");
+    return;
+  }
+  
+  // Get selected voting system
+  const selectedScale = document.querySelector('input[name="scale"]:checked').value;
+  // Check if members can manage session
+  const allowMemberManage = document.getElementById("allowManage").checked;
+  
+  // Generate room ID
+  const roomId = Math.random().toString(36).substring(2, 10); 
+  
+  // Store session data in sessionStorage - MARK AS HOST
+  sessionStorage.setItem("userName", name);
+  sessionStorage.setItem("sessionName", sessionName);
+  sessionStorage.setItem("votingSystem", selectedScale);
+  sessionStorage.setItem("allowMemberManage", allowMemberManage);
+  sessionStorage.setItem("isHost", "true"); // ✅ Set as host
+  sessionStorage.setItem("isRoomCreator", "true"); // ✅ Mark as room creator
+  
+  // Navigate to the room WITHOUT host parameter
+  window.location.href = `/index.html?roomId=${roomId}`;
+}
+  </script>
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+  const socket = io();
+
+  // Listen for host changes from server
+  socket.on("hostChanged", ({ hostId, userName }) => {
+    const currentSocketId = socket.id;
+    if (currentSocketId === hostId) {
+      sessionStorage.setItem("isHost", "true");
+      console.log("[HOST STATUS] You are the host");
+      // Enable host UI elements
+      enableHostFeatures();
+    } else {
+      sessionStorage.setItem("isHost", "false");
+      console.log("[HOST STATUS] Current host is:", userName || "None");
+      // Disable host UI elements for guest
+      disableHostFeatures();
+    }
+  });
+
+  // Listen for host leaving
+  socket.on("hostLeft", () => {
+    console.log("[HOST STATUS] Host left, session now has no host");
+    // You could prompt a guest to become host if desired
+  });
+
+  function joinRoom() {
+    const name = document.getElementById("joinNameInput").value.trim();
+    const sessionId = document.getElementById("sessionIdInput").value.trim();
+    const requestHost = document.getElementById("allowJoinAsHost").checked;
+
+    if (!name) {
+      alert("Please enter your name.");
+      return;
+    }
+
+    if (!sessionId) {
+      alert("Please enter a session ID.");
+      return;
+    }
+
+    // Save user info (basic)
+    sessionStorage.setItem("userName", name);
+    sessionStorage.setItem("requestedHost", requestHost ? "true" : "false");
+    sessionStorage.setItem("isRoomCreator", "false");
+    sessionStorage.setItem("isHost", "false");
+
+    // Ask server to join the session
+socket.emit("joinSession", { sessionId, requestedHost: requestHost, name }, (response) => {
+  console.log("[JOIN RESPONSE]", response);
+
+  // Update host status
+  sessionStorage.setItem("isHost", response.isHost ? "true" : "false");
+
+  // Only show modal if user requested host AND a host already exists
+  if (requestHost && !response.isHost && response.reason === "Host already exists") {
+    const modal = document.getElementById("guestModal");
+    modal.classList.remove("hidden");
+
+    document.getElementById("guestOkBtn").onclick = () => {
+      modal.classList.add("hidden");
+      window.location.href = `/index.html?roomId=${encodeURIComponent(sessionId)}`;
+    };
+
+    document.getElementById("guestCancelBtn").onclick = () => {
+      modal.classList.add("hidden");
+      window.location.href = `/main.html`;
+    };
+
+    return; // stop auto-navigation until user decides
+  }
+
+  // Navigate directly if guest or host allowed
+  window.location.href = `/index.html?roomId=${encodeURIComponent(sessionId)}`;
+});
+
+  }
+
+  // Example functions to enable/disable host features
+  function enableHostFeatures() {
+    // Show host controls (vote reveal, add story, etc.)
+    console.log("[UI] Host features enabled");
+  }
+
+  function disableHostFeatures() {
+    // Hide host controls
+    console.log("[UI] Host features disabled (guest mode)");
+  }
+</script>
+
+<!-- Guest Notice Modal -->
+<div id="guestModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <h3>Guest Access</h3>
+    <p>A host already exists in this session. Would you like to join as a guest.</p>
+    <div class="modal-actions">
+      <button id="guestOkBtn" class="modal-btn primary">OK</button>
+      <button id="guestCancelBtn" class="modal-btn secondary">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+  
+
+</body>
+</html>
