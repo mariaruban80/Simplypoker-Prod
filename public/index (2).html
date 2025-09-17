@@ -1,0 +1,7365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<link rel="preload" href="spade_1.png" as="image">
+<link rel="icon" type="image/png" href="spade_1.png">     
+<link rel="shortcut icon" href="spade_1.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">     
+<!-- Quill Editor CSS -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<!-- Quill Editor JS -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+<script src="language-manager.js"></script>
+<script src="jira-integration.js"></script>
+<script type="module" src="/socket.io/socket.io.js"></script>
+<script type="module" src="main.js"></script>      
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Planning Poker Interactive</title>
+<style>
+     body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: white;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+    }
+/*    body { 
+      background: white;
+      font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.5;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    } */
+    .container { 
+      display: flex; 
+      background: white;
+      min-height: calc(100vh - 140px);
+    }
+    
+    .sidebar, .rightbar { 
+      width: 20%; 
+      background: white; 
+      padding: 20px; 
+      overflow-y: auto;
+      border-right: white;
+      border-left-color: white;
+    }
+  #ticketDescriptionEditor {
+  width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+  }
+
+    
+    .rightbar {
+      border-right: none;
+      border-left: 1px solid white;
+    }
+     .button,
+     .invite-button,
+     .file-button,
+     .add-ticket-btn,
+     .confirm-button,
+     .cancel-button {
+       white-space: nowrap;
+       padding: 10px 16px;
+       min-width: max-content;
+       justify-content: center;
+       text-align: center;
+       display: inline-flex;
+       align-items: center;
+     }
+    
+    .main { 
+      flex: 1; 
+      padding: 20px; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center;
+      background: white;
+      border-right: white;
+      border-left-color: white;
+      box-shadow: none;
+    }
+
+     /* 3-dot menu styles */
+.story-actions {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  z-index: 10;
+  display: flex !important;
+}
+
+.story-menu-btn {
+  width: 24px;
+  height: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 16px;
+  transition: all 0.2s;
+  opacity: 1;
+}
+
+.story-menu-btn:hover { transform: scale(1.1); }
+
+.story-menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 120px;
+  display: none;
+  z-index: 1000;
+}
+
+.story-menu-dropdown.show {
+  display: block;
+}
+     
+.story-menu-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+}
+
+.story-menu-item:hover {
+  background-color: #f5f5f5;
+}
+
+.story-menu-item:first-child {
+  border-radius: 6px 6px 0 0;
+}
+
+.story-menu-item:last-child {
+  border-radius: 0 0 6px 6px;
+}
+
+.story-menu-item.delete {
+  color: #e53e3e;
+}
+
+.story-menu-item.delete:hover {
+  background-color: #fed7d7;
+}
+
+/* Hide old delete button */
+.story-delete-btn {
+   display: none !important;
+  visibility: hidden !important;
+}
+
+
+
+
+    
+    /* Updated button styling to match the ADD TICKET reference */
+    .button { 
+      margin: 10px 0; 
+      padding: 12px 20px; 
+      background-color: white; 
+      color: #673ab7; 
+      border: 1px solid #673ab7; 
+      border-radius: 25px; /* More rounded corners like ADD TICKET */
+      cursor: pointer; 
+      width: 100%;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      font-size: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      height: 42px; /* Fixed height for all buttons */
+      min-width: 140px; /* Minimum width to ensure buttons look good */
+      box-shadow: none;
+    }
+
+     .connection-status {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #4CAF50; /* Green = connected */
+  transition: background-color 0.3s;
+  z-index: 1000;
+}
+
+.connection-status.connecting {
+  background-color: #FFC107; /* Yellow = connecting */
+  animation: pulse 1.5s infinite;
+}
+
+.connection-status.disconnected {
+  background-color: #F44336; /* Red = disconnected */
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+    
+    .button:hover { 
+      background-color: #f0e6ff; /* Lighter purple background on hover */
+      color: #673ab7;
+    }
+    
+    /* Controls section with fixed height buttons */
+    .controls-section {
+      display: flex;
+      flex-direction: column;
+      margin-top: 15px;
+    }
+    
+    .controls-section .button {
+      margin: 5px 0;
+    }
+    
+    /* Navigation button container for parallel display */
+    .navigation-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      width: 100%;
+    }
+    
+    .navigation-buttons .button {
+      flex: 1;
+      margin: 0;
+    }
+    
+    /* Updated upload section to match reference screenshot */
+    .upload-section { 
+      padding: 15px 20px;
+      background: white;
+      display: flex;
+      justify-content: flex-end; /* Align to right side */
+      border-bottom: 1px solid transparent;
+    }
+    
+    .upload-right { 
+      display: flex;
+      gap: 10px;
+      width: auto; /* Not full width anymore */
+    }
+    
+    /* Fixed width buttons to match reference screenshot */
+    .invite-button { 
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      background-color: white;
+      color: #673ab7;
+      border: 1px solid #673ab7;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      height: 42px;
+      width: 140px; /* Fixed width */
+      box-sizing: border-box;
+      white-space: nowrap;
+    }
+
+    .invite-button:hover {
+      background-color: #f0e6ff;
+    }
+    
+    /* File input container to match reference screenshot */
+    .file-input {
+      display: inline-flex;
+      position: relative;
+      height: 42px;
+      width: 140px; /* Fixed width */
+    }
+
+    /* Fixed file button styling */
+    .file-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      background-color: white;
+      color: #673ab7;
+      border: 1px solid #673ab7;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      height: 42px;
+      width: 100%;
+      box-sizing: border-box;
+      white-space: nowrap;
+    }
+
+    .file-button:hover {
+      background-color: #f0e6ff;
+    }
+
+    .file-input input[type="file"] {
+      opacity: 0;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      z-index: 2;
+    }
+    
+    /* Updated modal styling with higher z-index to ensure it appears on top */
+    #inviteModalCustom {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+    
+    .modal-content {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      min-width: 300px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    
+    .modal-content h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    
+    .modal-content input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 15px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    
+    .modal-content .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .modal-content button {
+      padding: 10px 15px;
+      background: #673ab7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      min-width: 80px;
+      transition: all 0.2s;
+    }
+    
+    .modal-content button:hover {
+      background: #5c33a4;
+    }
+    
+    /* User list styling */
+    .sidebar h3, .rightbar h3 {
+      color: #673ab7;
+      margin-top: 0;
+      padding-bottom: 10px;
+      border-bottom: 1px solid white; /* Changed to white */
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      text-transform: uppercase;  
+    }
+    
+    #userList {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 0.5rem 0;
+      width: 100%;
+    }
+
+    .user-entry {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: white;
+      border-radius: 30px;
+      padding: 8px 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .user-entry.voted {
+      background: linear-gradient(to right, #e5f7e5, #c1e1c1);
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
+
+    .username {
+      font-weight: 600;
+      font-size: 14px;
+      color: #3b444b;
+      flex: 1;
+    }
+
+    /* Updated - Only change the opacity of question marks but keep original functionality */
+    .vote-badge {
+      background-color: transparent;
+      font-size: 14px; /* Match username font size */
+      font-weight: 600; /* Match username font weight */
+      padding: 2px 8px;
+      min-width: 28px;
+      text-align: center;
+      color: transparent; /* Hide question marks */
+    }
+    
+    /* When votes are revealed, show them with this color */
+    body.votes-revealed .vote-badge {
+      color: #673ab7 !important;
+      font-size: 14px;
+    }
+    
+    /* New poker table layout */
+    .poker-table-layout {
+      display: flex;
+       flex-direction: column;
+       align-items: center;
+       width: 100%;
+       max-width: 100%; /* Allow full width on smaller screens */
+       margin: 0 auto;
+       gap: 15px;
+       padding: 20px 5px; /* Reduce horizontal padding on small screens */;
+    }
+    
+    .current-story-display {
+      width: 100%;
+      max-width: 700px;
+      padding: 15px;
+      background-color: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .avatar-row {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    
+    .vote-row {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    
+    .avatar-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 70px;
+    }
+    
+    .avatar-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 18px;
+      background-color: #673ab7;
+      transition: all 0.3s ease;
+    }
+    
+    .has-voted .avatar-circle {
+      border: 2px solid #4CAF50;
+    }
+    
+    .user-name {
+      font-size: 12px;
+      margin-top: 5px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      font-weight: 500;
+    }
+    
+    .vote-card-space {
+      width: 40px;
+      height: 90px;
+      border: 1px dashed #ccc;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: white;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+    
+    .vote-card-space:hover {
+      border-color: #999;
+      background-color: #f9f9f9;
+    }
+    
+    .vote-card-space.has-vote {
+      border-style: solid;
+      border-color: #673ab7;
+      background-color: #f0e6ff;
+    }
+    
+    /* Updated - Make vote card question marks invisible but still functional */
+    .vote-card-space .vote-badge {
+     // font-size: 18px;
+      font-size: 14px;
+      font-weight: bold;
+      color: transparent; /* Make question marks invisible */
+    }
+    
+    /* Show vote values when votes are revealed */
+    body.votes-revealed .vote-card-space .vote-badge {
+      font-size: 16px !important; /* Base size for revealed votes */
+      max-width: 80% !important;
+      overflow: hidden !important;
+      text-align: center !important;
+      line-height: 1 !important;
+    }
+     /* Special cases for longer text in revealed votes */
+    body.votes-revealed .vote-card-space .vote-badge:contains("XX") {    
+      font-size: 14px !important;
+    }
+
+    body.votes-revealed .vote-card-space .vote-badge:contains("XXL"),
+    body.votes-revealed .vote-card-space .vote-badge:contains("XXS") {
+      font-size: 12px !important;
+    }
+    
+    .reveal-button-container {
+      margin: 15px 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    /* For T-shirt sizing which tends to have longer text */
+    .vote-badge:contains("XXS"), 
+    .vote-badge:contains("XXL") {
+      font-size: 14px !important;
+    }
+    .reveal-votes-button {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      background-color: white;
+      color: #673ab7;
+      border: 2px solid #673ab7;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 1px;
+      min-width: 200px;
+      text-transform: uppercase;
+      font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    .reveal-votes-button:hover {
+      background-color: #673ab7;
+      color: white;
+    }
+    
+    /* Vote cards styling */
+    .planning-cards-section {
+      width: 100%;
+      text-align: center;
+      margin-top: 20px;
+      padding: 15px;
+      background-color: white;
+       
+    }
+  
+    
+    .planning-cards-section h3 {
+      color: #673ab7; /* Changed to purple */
+      margin-bottom: 15px;
+      font-size: 14px;
+      font-weight: 600;
+      border-bottom: 1px solid white;
+      text-transform: uppercase;
+    }
+    
+    .cards {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .card {
+      width: 55px; /* Decreased size */
+      height: 50px; /* Decreased size */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e6e6fa; /* Light purple background */
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px; /* Smaller size */
+      text-align: center;
+      transition: all 0.2s;
+      color: #333;
+      font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      margin: 4px; /* Small margin */
+    }
+    
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Add disabled state for planning cards */
+    .card.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+      background-color: #f0f0f0;
+      color: #aaa;
+    }
+    
+    .card.disabled:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Voted heading in sidebar */
+    .section-heading {
+      font-size: 14px;
+      font-weight: 600;
+      padding-bottom: 10px;  
+      color: #673ab7;
+      margin: 20px 0 10px 0;
+      padding-bottom: 5px;
+      border-bottom: 1px solid white; /* Changed to white */
+    }
+
+    /* User-friendly UI tweaks */
+    @media (max-width: 1200px) {
+      .container {
+        flex-direction: column;
+        height: auto;
+      }
+      .sidebar, .rightbar {
+        width: 100%;
+        max-width: 100%;
+        border: none;
+        border-bottom: 1px solid white; /* Changed to white */
+      }
+    }
+
+    /* User circle container styling */
+    #userCircle {
+      background-color: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+    
+    /* Add Ticket button styling - Updated to match image */
+    .add-ticket-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      background-color: white;
+      color: #673ab7;
+      border: 1px solid #673ab7;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      margin: 0 0 20px 0;
+      height: 42px;
+    }
+    
+    .add-ticket-btn:hover {
+      background-color: #f0e6ff;
+    }
+    
+    .add-ticket-btn span {
+      margin-right: 5px;
+      font-size: 18px;
+      color: #673ab7;
+    }
+    
+    /* Story list container - no top heading */
+    .story-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+          max-width: 380px;
+    }
+     .rightbar {
+  width: 420px !important;
+  max-width: 420px;
+  min-width: 400px;
+  padding: 20px;
+  border: none;
+  background: white;
+}
+    
+    /* Hide any modal coming from main.js */
+    .modal-dialog, .modal-overlay {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    
+    /* Updated story text to handle long content */
+    .story-title {
+    flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  max-height: none;
+  width: auto;
+  text-align: left;
+  margin-right: 12px;
+    }
+    
+    /* Hide elements for guest users */
+    .hide-for-guests {
+      display: none !important; /* Use !important to override any inline styles */
+    }
+    /* Add disabled state for buttons */
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+      background-color: #f0f0f0;
+      color: #aaa;
+    }
+    /* No stories message */
+    .no-stories-message {
+      display: none;
+      text-align: center;
+      margin: 20px auto;
+      padding: 10px 15px;
+      background-color: #f9f9f9;
+      border: 1px dashed #ccc;
+      border-radius: 8px;
+      color: #666;
+      font-style: italic;
+      max-width: 80%;
+    }
+    /* Add these styles to the existing style section */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: white;
+      border-bottom: 1px solid white;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo img {
+      width: 24px;
+      height: 24px;
+      margin-right: 8px;
+    }
+    
+    .logo span {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 14px;
+    }
+    
+    .nav-links a {
+      text-decoration: none;
+      color: #6b7280;
+      padding: 5px;
+    }
+    
+    .session-button {
+      display: flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+    }
+    
+    .new-session {
+      background-color: #f3f4f6;
+      color: #111827;
+    }
+    
+    .new-session:before {
+      content: "+";
+      margin-right: 4px;
+      font-weight: bold;
+    }
+    
+    .join-session {
+      background-color: transparent;
+      color: #111827;
+    }
+    
+    .join-session:before {
+      content: "🧭";
+      margin-right: 4px;
+      font-size: 14px;
+    }
+    
+    .github-icon {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
+    
+    .country-selector {
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+     .action-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    #logOffBtn {
+       display: flex;
+      align-items: center;
+      padding: 6px 12px;
+      background-color: #f3f4f6;
+      color: #111827;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+        
+    }
+    
+    #logOffBtn:hover {
+      background-color: #e5e7eb; 
+    }    
+/* Add a logout icon before the text */
+#logOffBtn:before {
+  content: "🏃";
+  margin-right: 4px;
+  font-size: 16px;
+}
+    
+    /* Custom Login Modal Styling */
+#loginModalCustom {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+#loginModalCustom .modal-content {
+  background-color: white;
+  border-radius: 10px;
+  padding: 30px 40px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+#loginModalCustom h3 {
+  color: #673ab7;
+  margin-top: 0;
+  font-size: 22px;
+  margin-bottom: 15px;
+}
+
+#loginModalCustom p {
+  color: #666;
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+#loginModalCustom input {
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  border: 1px solid #d0d0d0;
+  border-radius: 25px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+#loginModalCustom input:focus {
+  outline: none;
+  border-color: #673ab7;
+  box-shadow: 0 0 0 2px rgba(103, 58, 183, 0.2);
+}
+
+#loginModalCustom .button-group {
+  display: flex;
+  justify-content: center;
+}
+
+#loginModalCustom .action-button {
+  background-color: #673ab7;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+#loginModalCustom .action-button:hover {
+  background-color: #5c33a4;
+  transform: translateY(-2px);
+}
+
+#loginModalCustom .action-button:active {
+  transform: translateY(0);
+}
+
+.add-ticket-modal {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px 25px;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  border: 2px solid #673ab7;
+}
+
+.add-ticket-modal h3 {
+  color: #673ab7;
+  margin-top: 0;
+  font-size: 20px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.input-group {
+  margin-bottom: 16px;
+}
+
+.input-group label {
+  display: block;
+  color: #673ab7;
+  font-size: 14px;
+  margin-bottom: 6px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #673ab7;
+  box-shadow: 0 0 0 2px rgba(103, 58, 183, 0.2);
+}
+
+.add-ticket-modal .button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 25px;
+}
+
+.cancel-button {
+  background-color: white;
+  color: #666;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 48%;
+}
+
+.cancel-button:hover {
+  background-color: #f5f5f5;
+}
+
+.confirm-button {
+  background-color: #673ab7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 48%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-button:hover {
+  background-color: #5c33a4;
+}
+
+.plus-icon {
+  margin-right: 5px;
+  font-weight: bold;
+}
+    /* Current user display in header */
+.current-user-display {
+    display: flex;
+  align-items: center;
+  margin-right: 15px;
+  background-color: transparent;
+  padding: 0;
+  border: none;
+}
+
+.user-avatar {
+  margin-right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: white;
+  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+#headerUsername {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-right: 8px;
+white-space: nowrap;
+}
+
+/* Updated LOG OFF button style */
+#logOffBtn {
+    display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  background-color: white;
+  color: #673ab7;
+ /* border: 1px solid #673ab7; */
+     border: white;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+#logOffBtn:hover {
+  background-color: #f0e6ff;
+}
+
+#logOffBtn:before {
+  content: "🚪";
+  margin-right: 4px;
+  font-size: 14px;
+}
+
+/* Add these responsive styles to index.html's style section */
+
+/* Make the layout responsive */
+@media (max-width: 768px) {
+  .avatar-row, .vote-row {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0 5px;
+    box-sizing: border-box;
+  }
+
+  .card-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #ffffff;
+    border-top: 1px solid #ddd;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    padding: 10px 5px;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+  }
+
+  .card-panel .cards {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 5px 0;
+    gap: 8px;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 5px;
+  }
+  
+  .card-panel .cards::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .card-panel .cards::-webkit-scrollbar-thumb {
+    background: #673ab7;
+    border-radius: 2px;
+  }
+  
+  .vote-card-space {
+    width: 45px;
+    height: 70px;
+    min-width: 45px;
+    margin: 3px;
+  }
+  
+  /* Smaller font for votes on mobile */
+  body.votes-revealed .vote-card-space .vote-badge {
+    font-size: 14px !important;
+  }
+  
+  body.votes-revealed .vote-card-space .vote-badge:contains("XX") {
+    font-size: 12px !important;
+  }
+  
+  /* Container layout for mobile */
+  .container {
+    flex-direction: column;
+    height: auto;
+    padding-bottom: 70px; /* Space for fixed card panel */
+  }
+  
+  .sidebar, .rightbar {
+    width: 100%;
+    max-width: 100%;
+    padding: 15px;
+    border: none;
+  }
+  
+  /* Mobile header adjustments */
+  header {
+    padding: 8px 15px;
+  }
+  
+  .logo span {
+    font-size: 16px;
+  }
+  
+  /* Collapsible sections for mobile */
+  .mobile-toggle-button {
+    display: flex;
+    width: 100%;
+    padding: 12px;
+    background: #f5f5f5;
+    border: none;
+    text-align: left;
+    font-weight: bold;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    align-items: center;
+  }
+  
+  .mobile-toggle-button:after {
+    content: "▼";
+    margin-left: auto;
+    transition: transform 0.2s;
+  }
+  
+  .mobile-toggle-button.active:after {
+    transform: rotate(180deg);
+  }
+  
+  .mobile-collapsible {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+  
+  .mobile-collapsible.active {
+    max-height: 500px;
+    overflow-y: auto;
+  }
+  
+  /* Improved touch targets */
+  .button, .invite-button, .file-button, .story-card {
+    min-height: 44px; /* Apple's recommended minimum touch target size */
+  }
+  
+  .card {
+    width: 40px;
+    height: 40px;
+    font-size: 12px;
+    margin: 3px;
+  }
+  
+  /* Modals on mobile */
+  #loginModalCustom .modal-content,
+  #inviteModalCustom .modal-content,
+  #addTicketModalCustom .modal-content {
+    width: 90%;
+    padding: 20px;
+    max-width: 320px;
+  }
+  
+  /* Selected-card feedback */
+  .selected-card {
+    transform: scale(1.1);
+    border: 2px solid #673ab7;
+    background-color: #e8f0fe;
+    box-shadow: 0 0 8px rgba(103, 58, 183, 0.5);
+  }
+  
+  /* Fix user circle display on mobile */
+  #userCircle {
+    margin-bottom: 80px;
+    padding: 10px 5px;
+  }
+  
+  /* Fix alignment on mobile */
+  .avatar-container {
+    width: 60px;
+  }
+  
+  .avatar-circle {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Smaller mobile phones */
+@media (max-width: 480px) {
+  .container {
+    flex-direction: column;
+  }
+  
+  .sidebar, .rightbar {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+  }
+  
+  .vote-card-space {
+    width: 40px;
+    height: 60px;
+    min-width: 40px;
+  }
+  
+  .card {
+    width: 35px;
+    height: 35px;
+    font-size: 11px;
+  }
+  
+  .avatar-container {
+    width: 50px;
+  }
+  
+  .avatar-circle {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .reveal-votes-button {
+    padding: 10px 16px;
+    font-size: 14px;
+    min-width: 160px;
+  }
+  
+  .user-name {
+    font-size: 10px;
+  }
+  
+  /* Fixed-width buttons get smaller */
+  .invite-button, .file-button {
+    width: 100px;
+  }
+  
+  .navigation-buttons .button {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  /* Fix header in tight spaces */
+  #headerUsername {
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Emoji burst animation */
+.global-emoji-burst {
+  position: fixed;
+  font-size: 2rem;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.5) translateY(0);
+  transition: transform 0.8s ease-out, opacity 0.8s ease-out;
+  z-index: 9999;
+}
+
+.global-emoji-burst.burst-go {
+  opacity: 1;
+  transform: scale(1.5) translateY(-100px);
+}
+
+/* Add input shake animation for validation if not already present */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Own vote space styling */
+.own-vote-space {
+  border: 2px dashed #673ab7;
+  position: relative;
+}
+
+.own-vote-space::after {
+  content: 'Your vote';
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #673ab7;
+  white-space: nowrap;
+}
+
+/* Add styles for the drop-not-allowed state */
+.vote-card-space.drop-not-allowed {
+  border-color: #f44336;
+  background-color: #ffebee;
+  position: relative;
+}
+
+.vote-card-space.drop-not-allowed::before {
+  content: '✕';
+  position: absolute;
+  color: #f44336;
+  font-size: 24px;
+  font-weight: bold;
+  opacity: 0.8;
+}
+     
+  @media (max-width: 767px) {
+    /* Fix positioning for mobile */
+    .avatar-row, .vote-row {
+      gap: 15px !important;
+    }
+    
+    /* Make sure the user vote card is highlighted */
+    .own-vote-space {
+      border: 2px dashed #673ab7 !important;
+    }
+    
+    /* Properly show vote values */
+    body.votes-revealed .vote-badge {
+      color: #673ab7 !important;
+      opacity: 1 !important;
+    }
+    
+    /* Fix the header for small screens */
+    #headerUsername {
+      max-width: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    /* Fix story list display */
+    .story-title {
+      font-size: 13px;
+      -webkit-line-clamp: 2;
+    }
+    
+    /* Improve fixed card panel */
+    .card-panel {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+    }
+    
+    /* Add proper spacing to main container */
+    .container {
+      padding-top: 10px !important;
+    }
+    
+    /* Make sure buttons have consistent styling */
+    .button, .invite-button, .file-button {
+      min-height: 42px;
+    }
+    
+    /* Make modals more mobile-friendly */
+    .modal-content {
+      max-width: 90% !important;
+      width: 320px !important;
+      padding: 20px !important;
+    }
+  }
+
+  
+/* ==== Story card meta: vote count and editable points ==== */
+.story-meta {
+  display: flex;
+  justify-content: space-between; /* Keep space-between */
+  align-items: center;
+  margin-top: auto;
+  width: 100%;
+}
+
+.story-meta .vote-count {
+  display: flex !important;
+  align-items: center;
+  font-size: 14px;
+  color: #6b7280;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border: none;
+  text-align: left;
+  flex-shrink: 0;
+  font-weight: 500;
+  opacity: 1 !important;
+  visibility: visible !important;
+  justify-self: flex-start; /* Force to left side */
+  flex-grow: 0; /* Don't grow to fill space */
+}
+
+.story-meta .vote-count::before {
+  content: '👥';
+  margin-right: 6px;
+  font-size: 14px;
+}
+
+/* Show vote count when votes are revealed */
+.story-meta .vote-count.revealed {
+  display: block;
+}
+
+
+
+.story-id {
+  display: inline-block;
+  background: linear-gradient(135deg, #673ab7, #8b5cf6);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(103, 58, 183, 0.2);
+  line-height: 1.2;
+  width: auto;
+  max-width: max-content;
+}
+
+
+.story-card {
+  width: 100% !important;      /* fills parent width */
+  max-width: 100% !important;  /* match Add Ticket button width */
+}
+.story-container {
+  max-width: 380px;            /* keeps consistent column width */
+}
+
+
+.export-options-inline {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.export-options-inline label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+     .export-preview-table-container {
+  max-height: 300px;
+  overflow: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  margin-top: 10px;
+}
+
+.export-preview-table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.export-preview-table-container th,
+.export-preview-table-container td {
+  padding: 8px;
+  border: 1px solid #ddd;
+  text-align: left;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.export-preview-table-container thead th {
+  background-color: #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.export-preview-table-container tbody tr:hover {
+  background-color: #f5f5f5;
+}
+
+
+.export-field {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.export-field label {
+  width: 160px;
+  font-weight: 600;
+  text-align: right;
+  margin-right: 10px;
+}
+.export-field select {
+  flex: 1;
+  padding: 6px;
+}
+
+</style>
+
+
+  <style>
+.profile-menu {
+  display: none;
+  position: absolute;
+  top: 65px; /* adjust if your header height is different */
+  right: 24px;
+  width: 320px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(103,58,183,0.17);
+  z-index: 99999;
+  font-family: inherit;
+  padding-bottom: 10px;
+}
+.profile-menu.show { display: block; }
+
+.profile-menu-header {
+  display: flex;
+  align-items: center;
+  padding: 20px 20px 12px 20px;
+}
+.profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin-right: 14px;
+}
+.profile-menu-name { font-weight: bold; font-size: 18px; }
+.profile-menu-divider { border-bottom: 1px solid #eee; margin:8px 0; }
+.profile-menu-item {
+ display: flex;
+ gap: 12px;
+  width: 100%;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #673ab7;
+  font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  cursor: pointer;     
+  transition: background 0.2s ease;
+     
+}
+       .profile-menu-item .switch {
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+.profile-menu-item:hover {  
+  background: #f0e6ff;
+  color: #501ca3;
+}
+.profile-menu-item.logout { 
+  color: #e53935;
+  font-weight: 700;
+}
+  .profile-menu-item.logout:hover {
+  background-color: #fee;
+  color: #c62828;
+}
+
+.flag-icon {
+  width: 20px; /* Size of the flag */
+  height: 20px; /* Keep aspect ratio correct */
+  border-radius: 3px;   /* Round the corners */
+  object-fit: cover; /* Prevent distortion */
+  display: inline-block; /* Ensure correct spacing */
+  vertical-align: middle; /* Fix vertical alignment (if necessary) */
+flex-shrink: 0;
+}
+     
+.vote-bubble {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  background: #673ab7;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+}
+
+
+.export-options-inline {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.export-options-inline label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+</style>
+<style>
+     #addTicketModalCustom {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw; height: 100vh;
+  
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+  .ql-container {
+  min-height: 150px !important;
+}
+#addTicketModalCustom .modal-content.add-ticket-modal {
+  background: #fff;
+  border-radius: 18px;
+  padding: 40px 28px 34px 28px;
+  max-width: 850px;
+  width: 96%;
+  box-shadow: 0 6px 32px rgba(98,54,184,0.16);
+  border: 2px solid #a98cdf;
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+#addTicketModalCustom h3 {
+  color: #753acb;
+  font-weight: 700;
+  margin: 0 0 24px 0;
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  text-align: left;
+}
+#addTicketModalCustom .input-group {
+  margin-bottom: 20px;
+}
+#addTicketModalCustom .input-group label {
+  color: #753acb;
+  font-weight: 600;
+  margin-bottom: 7px;
+  display: block;
+  font-size: 15px;
+}
+#addTicketModalCustom input[type="text"] {
+  width: 100%;
+  border: 1.5px solid #cdbdee;
+  border-radius: 6px;
+  padding: 12px 13px;
+  font-size: 16px;
+  background: #fff;
+  margin-bottom: 0;
+  transition: border 0.18s;
+}
+#addTicketModalCustom input[type="text"]:focus {
+  outline: none;
+  border-color: #753acb;
+  box-shadow: 0 0 0 2px #e1d9fc;
+}
+#addTicketModalCustom .ql-toolbar.ql-snow {
+     display: flex !important;
+      flex-wrap: wrap;
+      gap: 0.15rem;
+      border-radius: 6px 6px 0 0;
+}
+#addTicketModalCustom .ql-container.ql-snow {
+     border-radius: 0 0 6px 6px;
+      min-height: 120px;
+   max-height: 200px; /* Limit the height */
+  overflow-y: auto;  /* Enable vertical scrolling */
+}
+#addTicketModalCustom .ql-editor {
+font-size: 15px;
+      padding: 12px 14px;
+      min-height: 100px;
+      box-sizing: border-box;
+}
+#addTicketModalCustom .button-group {
+  display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+      gap: 12px;
+}
+#addTicketModalCustom .cancel-button, #addTicketModalCustom .confirm-button {
+  flex: 1;
+  height: 50px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 17px;
+  transition: background 0.14s, color 0.14s, border 0.14s;
+  cursor: pointer;
+  outline: none;
+  letter-spacing: 0.05em;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#addTicketModalCustom .cancel-button {
+  background: #fff;
+  color: #753acb;
+  border: 2.5px solid #753acb;
+}
+#addTicketModalCustom .cancel-button:hover {
+  background: #f3e8ff;
+}
+#addTicketModalCustom .confirm-button {
+  background: #753acb;
+  color: #fff;
+  border: 2.5px solid #753acb;
+}
+#addTicketModalCustom .confirm-button:hover {
+  background: #501ca3;
+  border-color: #501ca3;
+}
+#addTicketModalCustom .plus-icon {
+  font-weight: bold;
+  font-size: 20px;
+  margin-right: 8px;
+  line-height: 1;
+}
+
+
+.vote-bubble {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  background: #673ab7;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+}
+
+
+.export-options-inline {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.export-options-inline label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+</style>
+
+
+     
+     <style>
+
+.planning-cards-section {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border-top: none;
+  padding: 10px 0;
+  z-index: 1000;
+}
+
+/* Card panel styling */
+.card-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* Cards container */
+.cards {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 5px 0;
+  overflow-x: auto;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Add padding to main container to prevent content from being hidden behind fixed panel */
+.container {
+  padding-bottom: 120px !important;
+}
+
+/* Increase z-index for reveal button to appear above cards panel */
+.reveal-button-container {
+  position: relative;
+  z-index: 1001;
+}
+     
+.vote-bubble {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  background: #673ab7;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+}
+
+
+.export-options-inline {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.export-options-inline label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+</style>
+<style>
+/* Language Modal Styles */
+#languageModalCustom {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+}
+
+.language-modal-content {
+  background-color: white;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.language-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.language-modal-header h3 {
+  margin: 0;
+  color: #673ab7;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: #f5f5f5;
+}
+
+.language-grid {
+  padding: 20px 25px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: white;
+}
+
+.language-option:hover {
+  border-color: #673ab7;
+  background-color: #f8f5ff;
+}
+
+.language-option.selected {
+  border-color: #673ab7;
+  background-color: #e8f0fe;
+  box-shadow: 0 2px 8px rgba(103, 58, 183, 0.2);
+}
+
+.language-flag {
+  font-size: 24px;
+  margin-right: 12px;
+  width: 32px;
+  text-align: center;
+}
+
+.language-info {
+  flex: 1;
+}
+
+.language-name {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.language-code {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+}
+
+.language-radio {
+  width: 18px;
+  height: 18px;
+  margin-left: auto;
+  accent-color: #673ab7;
+}
+
+.language-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 25px;
+  border-top: 1px solid #e0e0e0;
+  gap: 10px;
+}
+
+.language-apply-btn, .language-cancel-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+}
+
+.language-apply-btn {
+  background-color: #673ab7;
+  color: white;
+  border: none;
+}
+
+.language-apply-btn:hover {
+  background-color: #5c33a4;
+}
+
+.language-cancel-btn {
+  background-color: white;
+  color: #666;
+  border: 1px solid #ddd;
+}
+
+.language-cancel-btn:hover {
+  background-color: #f5f5f5;
+}
+
+/* Loading state */
+.language-loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #673ab7;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+  .language-grid {
+    grid-template-columns: 1fr;
+    padding: 15px 20px;
+  }
+  
+  .language-modal-content {
+    width: 95%;
+    margin: 20px;
+  }
+}
+  
+
+.vote-bubble {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  background: #673ab7;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+}
+
+
+.export-options-inline {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.export-options-inline label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+</style>
+<style>
+/* CSV Upload Modal Styles */
+#csvUploadModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10002;
+}
+
+.csv-modal-content {
+  background-color: white;
+  border-radius: 12px;
+  max-width: 900px;
+  width: 90%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.csv-step {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+}
+
+.csv-step.active {
+  display: flex;
+}
+
+.csv-modal-header {
+  display: flex;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+.csv-modal-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 20px;
+  font-weight: 600;
+  flex: 1;
+  text-align: center;
+}
+
+.csv-back-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 5px 10px;
+  margin-right: 10px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.csv-back-btn:hover {
+  background-color: #e9ecef;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.close-button:hover {
+  background-color: #f5f5f5;
+}
+
+/* Step 1: Upload Section */
+.csv-upload-section {
+  padding: 30px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.csv-checkbox-container {
+  margin-bottom: 30px;
+}
+
+.csv-checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: #333;
+  user-select: none;
+}
+
+.csv-checkbox-label input[type="checkbox"] {
+  margin-right: 12px;
+  width: 18px;
+  height: 18px;
+  accent-color: #673ab7;
+}
+
+.csv-dropzone {
+  flex: 1;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 60px 40px;
+  text-align: center;
+  background-color: #f9fafb;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.csv-dropzone:hover,
+.csv-dropzone.dragover {
+  border-color: #673ab7;
+  background-color: #f8f5ff;
+}
+
+.csv-drop-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.csv-drop-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.csv-drop-text {
+  font-size: 18px;
+  color: #6b7280;
+}
+
+.csv-choose-file-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+  font-size: 18px;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.csv-choose-file-btn:hover {
+  color: #2563eb;
+}
+
+/* Step 2: Mapping Section */
+.csv-mapping-section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 70vh;
+}
+
+.csv-mapping-dropdowns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  padding: 25px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+.csv-mapping-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.csv-mapping-item label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.csv-mapping-select {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.csv-mapping-select:focus {
+  outline: none;
+  border-color: #673ab7;
+  box-shadow: 0 0 0 2px rgba(103, 58, 183, 0.2);
+}
+
+.csv-mapping-select[required] {
+  border-color: #3b82f6;
+}
+
+.csv-preview-section {
+  flex: 1;
+  padding: 25px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.csv-preview-table-container {
+  flex: 1;
+  overflow: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: white;
+}
+
+.csv-preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.csv-preview-table th,
+.csv-preview-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: top;
+}
+
+.csv-preview-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #374151;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.csv-preview-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.csv-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 25px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+.csv-cancel-btn,
+.csv-import-btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid;
+}
+
+.csv-cancel-btn {
+  background-color: white;
+  color: #753acb; 
+  border-color: #753acb; 
+}
+
+.csv-cancel-btn:hover {
+  background-color: #f3e8ff; 
+  border-color: #501ca3; 
+  color: #501ca3;
+}
+
+
+.csv-import-btn {
+  background-color: #753acb; 
+  color: white;
+  border-color: #753acb; 
+}
+
+.csv-import-btn:hover {
+  background-color: #501ca3; 
+  border-color: #501ca3;
+}
+
+.csv-import-btn:disabled {
+  background-color: #9ca3af;
+  border-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .csv-modal-content {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .csv-mapping-dropdowns {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .csv-upload-section {
+    padding: 20px;
+  }
+  
+  .csv-dropzone {
+    padding: 40px 20px;
+    min-height: 200px;
+  }
+  
+  .csv-drop-text {
+    font-size: 16px;
+  }
+/* Completely hide old CSV system */
+#csvInput,
+#fileInputContainer,
+.file-input {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Ensure import button is visible and clickable */
+#importCsvBtn {
+  display: block !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+}
+     
+
+.vote-bubble {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  background: #673ab7;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+}
+
+
+.export-options-inline {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.export-options-inline label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+</style>
+     
+
+<!-- PATCH: hide default inline vote-bubbles and make room for moved bubble -->
+<style id="patch-vote-bubble-style">
+/* Hide legacy vote-bubble instances that may have been injected in multiple places */
+.vote-bubble { display: none !important; }
+.story-actions { position: relative; }
+/* Our new standardized vote-bubble styling (will be injected by main.js patch) */
+.vote-bubble-standard {
+  position: absolute;
+  right: 36px; /* right of 3-dot menu */
+  top: 4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  background: #673ab7 !important;
+  color: white;
+  font-size: 12px;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 50;
+  pointer-events: none;
+}
+
+.export-options-inline {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.export-options-inline label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+</style>
+
+<style>
+/* CORRECTED: Story card layout to exactly match host1 image */
+.story-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #3b82f6; /* Blue left border like in host1 image */
+  border-radius: 8px;
+  min-height: 90px;
+    width: 100% !important;      /* fills parent width */
+  max-width: 100% !important; 
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: white;
+  color: #333;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.story-card:hover {
+  background-color: #f8fafc;
+  border-color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.story-card.selected, .story-card.active { 
+  background-color: #eff6ff;
+  border-color: #3b82f6;
+  border-left-color: #3b82f6;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+/* Story ID at the top - purple and bold like PROJ-141 */
+
+
+/* Story description/title */
+.story-title {
+  flex-grow: 1;
+  font-size: 13px;
+  font-weight: 400;
+  color: #374151;
+  line-height: 1.4;
+  margin-bottom: 12px;
+  word-wrap: break-word;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  padding-right: 40px; /* Space for 3-dot menu */
+}
+     /* Add a small dropdown arrow next to the username */
+.current-user-display::after {
+  content: "▼";
+  margin-left: 6px;
+  font-size: 10px;
+  color: #6b7280;
+  transition: transform 0.2s ease;
+}
+
+.current-user-display:hover::after {
+  color: #374151;
+  transform: rotate(180deg);
+}
+
+/* Story meta container - positioned at bottom */
+.story-meta {
+  display: flex;
+  justify-content: space-between; /* This is key - spreads items apart */
+  align-items: center;
+  margin-top: auto;
+  width: 100%; /* Use full width */
+  gap: 10px; /* Space between vote count and points */
+}
+
+/* Vote count - positioned at bottom left with people icon */
+.story-meta .vote-count {
+  display: flex !important;
+  align-items: center;
+  font-size: 14px;
+  color: #6b7280;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border: none;
+  min-width: auto;
+  text-align: left;
+  flex-shrink: 0;
+  font-weight: 500;
+  opacity: 1 !important;
+  visibility: visible !important;
+  order: 1; /* Ensures it comes first */
+}
+
+.story-meta .vote-count::before {
+  content: '👥';
+  margin-right: 4px;
+  font-size: 12px;
+}
+
+/* Always show vote count, even when 0 */
+.story-meta .vote-count {
+  display: flex !important;
+  opacity: 1 !important;
+}
+
+/* Story points - positioned at bottom right, green like in host1 */
+.story-meta .story-points {
+  background: #10b981; /* Green matching host1 image */
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 2px;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  position: absolute;   
+  bottom: 8px;          
+  right: 8px; 
+}
+
+.story-meta .story-points:hover {
+  background: #059669;
+}
+
+/* Feature tag - positioned at top right like in host1 image */
+.story-feature-tag {
+  position: absolute;
+  top: 8px;
+  right: 32px; /* Space for 3-dot menu */
+  background: #dbeafe;
+  color: #3b82f6;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 8px;
+  text-transform: capitalize;
+}
+
+/* 3-dot menu positioning - top right corner */
+.story-actions {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  z-index: 10;
+}
+
+.story-menu-btn {
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.story-menu-btn:hover { transform: scale(1.1); }
+
+/* Story list container adjustments */
+.story-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 380px; /* Reduce container width significantly */
+}
+
+
+/* Hide legacy vote bubbles */
+.vote-bubble,
+.vote-bubble-standard {
+  display: none !important;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .story-card {
+    padding: 10px 12px;
+    min-height: 80px;
+    max-width: 100%;
+  }
+  
+
+  .story-container {
+   max-width: 380px;  
+  }
+}
+.menu-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+  color: #673ab7; /* same purple as other icons */
+     flex-shrink: 0;
+}
+
+.profile-menu-item:hover .menu-icon {
+  color: #501ca3;
+}
+.profile-menu-item.logout .menu-icon {
+  color:  #673ab7; 
+}
+
+.profile-menu-item.logout:hover .menu-icon {
+  color: #501ca3;
+}
+     
+html, body {
+  overflow-x: hidden;
+  scrollbar-width: none; /* Firefox */
+}
+
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+
+.export-options-inline {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.export-options-inline label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+</style>
+
+<style>
+     .story-card {
+  position: relative;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+    width: 100% !important;      
+  max-width: 100% !important;  /* match add ticket button width */
+}
+
+.story-card:hover {
+  box-shadow: 0 4px 12px rgba(103, 58, 183, 0.1);
+  border-color: #673ab7;
+  transform: translateY(-1px);
+}
+
+.story-card.selected, .story-card.active {
+  border-color: #673ab7;
+  background: linear-gradient(135deg, #f8f5ff 0%, #f0e6ff 100%);
+  box-shadow: 0 4px 16px rgba(103, 58, 183, 0.15);
+}
+
+/* Story ID Badge */
+
+
+/* Story Title */
+.story-title {
+  flex-grow: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* Story Meta Container */
+.story-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid #f3f4f6;
+}
+
+/* Vote Count */
+.story-meta .vote-count {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.story-meta .vote-count::before {
+  content: '👥';
+  margin-right: 4px;
+  font-size: 14px;
+}
+
+/* Story Points Badge */
+.story-points {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 8px;
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.story-points:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* 3-Dot Menu */
+.story-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.story-card:hover .story-actions {
+  opacity: 1;
+}
+
+.story-menu-btn {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.story-menu-btn:hover { transform: scale(1.1); }
+
+/* Feature Tag (optional) */
+.story-feature-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Loading State */
+.story-card.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.story-card.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid #673ab7;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .story-card {
+    padding: 12px;
+    min-height: 100px;
+  }
+  
+  .story-title {
+    font-size: 13px;
+  }
+  
+  
+}
+
+.export-options-inline {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.export-options-inline label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+</style>
+<style>
+  .search-container {
+  display: flex;
+  align-items: stretch; /* Ensures both input and button share height */
+  margin-bottom: 15px;
+}
+
+#ticketSearch {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 25px 0 0 25px;
+  font-size: 14px;
+  outline: none;
+  height: 42px; /* Same as add ticket button */
+  box-sizing: border-box;
+}
+
+#ticketSearch:focus {
+  border-color: #673ab7;
+  box-shadow: 0 0 0 2px rgba(103, 58, 183, 0.2);
+}
+
+#filterBtn {
+  background: white;
+  border: 1px solid #ddd;
+  border-left: none;
+  border-radius: 0 25px 25px 0;
+  padding: 0 16px;
+  cursor: pointer;
+  height: 42px; /* Match input height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+#filterBtn i {
+  color: #666;
+  font-size: 16px;
+
+ /* Export CSV Modal Styles */
+.export-section {
+  padding: 20px 0;
+}
+
+.field-mapping {
+  margin-bottom: 30px;
+}
+
+.mapping-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 15px;
+}
+
+.mapping-row label {
+  min-width: 120px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.mapping-select {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  font-size: 14px;
+}
+
+.mapping-select:focus {
+  outline: none;
+  border-color: #673ab7;
+  box-shadow: 0 0 0 3px rgba(103, 58, 183, 0.1);
+}
+
+.export-options {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 10px;
+}
+
+.option-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+}
+
+.option-row label {
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+}
+
+.preview-section {
+  margin-bottom: 20px;
+}
+
+.export-preview {
+  max-height: 200px;
+  overflow: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  padding: 15px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: #673ab7;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #5e35b1;
+}
+
+.btn-secondary {
+  background-color: #6b7280;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5b6470;
+}
+
+.btn-cancel {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.btn-cancel:hover {
+  background-color: #d1d5db;
+}    
+}
+
+
+/* Export CSV Modal */
+#exportCsvModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.7);
+  display: none; /* hidden by default */
+  align-items: center;
+  justify-content: center;
+  z-index: 10003; /* higher than other modals */
+}
+
+#exportCsvModal .modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 30px 40px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Field mapping layout */
+.field-mapping {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px 20px;
+}
+
+.field-mapping label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.field-mapping select {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+}
+
+/* Export options checkboxes */
+.export-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.export-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.export-options input[type="checkbox"] {
+  accent-color: #673ab7;
+}
+
+/* Preview box */
+.csv-preview {
+  font-family: monospace;
+  background: #f9fafb;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+
+/* Buttons */
+#exportCsvModal .button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+#exportCsvModal .button-group button {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#exportCsvModal .cancel-btn {
+  background: white;
+  border: 1px solid #ccc;
+  color: #666;
+}
+
+#exportCsvModal .cancel-btn:hover {
+  background: #f5f5f5;
+}
+
+#exportCsvModal .confirm-btn {
+  background: #673ab7;
+  color: white;
+  border: none;
+}
+
+#exportCsvModal .confirm-btn:hover {
+  background: #5c33a4;
+}
+
+
+.export-options-inline {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.export-options-inline label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+}
+
+</style>
+<style>
+/* JIRA Import Modal Styles - Centered Fix */
+#jiraImportModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10004;
+  padding: 20px; /* Add padding for mobile */
+  box-sizing: border-box;
+}
+
+/* When modal is shown, use flex display */
+#jiraImportModal.show {
+  display: flex;
+}
+
+#jiraImportModal .jira-modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 850px;
+  width: 90%;
+  max-height: 85vh;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+}
+
+.jira-step {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+  background: white;
+}
+
+.jira-step.active {
+  display: flex;
+}
+
+.jira-modal-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: white;
+}
+
+.jira-modal-header h3 {
+  margin: 0;
+  color: #8b5cf6;
+  font-size: 18px;
+  font-weight: 600;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.jira-back-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 5px 10px;
+  margin-right: 15px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.jira-back-btn:hover {
+  background-color: #e9ecef;
+}
+
+/* Close button positioned in top right */
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #999;
+  cursor: pointer;
+  padding: 5px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+}
+
+.close-button:hover {
+  background-color: #f5f5f5;
+}
+
+.jira-connection-section {
+  padding: 28px;
+  flex: 1;
+  background: white;
+  overflow-y: auto;
+}
+
+.jira-form-group {
+  margin-bottom: 20px;
+}
+
+.jira-form-group label {
+  display: block;
+  font-weight: 600;
+  color: #753acb;
+  margin-bottom: 7px;
+  font-size: 15px;
+}
+
+.jira-input, .jira-select {
+  width: 100%;
+  padding: 12px 13px;
+  border: 1.5px solid #cdbdee;
+  border-radius: 6px;
+  font-size: 16px;
+  background-color: white;
+  transition: border 0.18s;
+  box-sizing: border-box;
+}
+
+.jira-input:focus, .jira-select:focus {
+  outline: none;
+  border-color: #753acb;
+  box-shadow: 0 0 0 2px #e1d9fc;
+}
+
+.jira-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 28px;
+  border-top: 1px solid #e0e0e0;
+  background: white;
+  margin-top: auto;
+}
+
+.jira-btn {
+  flex: 1;
+  height: 50px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 17px;
+  transition: background 0.14s, color 0.14s, border 0.14s;
+  cursor: pointer;
+  outline: none;
+  letter-spacing: 0.05em;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2.5px solid;
+}
+
+.jira-btn-primary {
+  background: #753acb;
+  color: white;
+  border-color: #753acb;
+}
+
+.jira-btn-primary:hover:not(:disabled) {
+  background: #501ca3;
+  border-color: #501ca3;
+}
+
+.jira-btn-primary:disabled {
+  background: #9ca3af;
+  border-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.jira-btn-secondary {
+  background: white;
+  color: #753acb;
+  border-color: #753acb;
+}
+
+.jira-btn-secondary:hover {
+  background: #f3e8ff;
+}
+
+.jira-btn-cancel {
+  background: white;
+  color: #753acb;
+  border-color: #753acb;
+}
+
+.jira-btn-cancel:hover {
+  background: #f3e8ff;
+}
+
+.connection-status-indicator {
+  padding: 10px;
+  border-radius: 6px;
+  margin: 15px 0;
+  background: white;
+}
+
+.connection-status-indicator.success {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.connection-status-indicator.error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.connection-status-indicator.loading {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fed7aa;
+}
+
+/* Selection step styles */
+.jira-selection-section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 70vh;
+  background: white;
+}
+
+.jira-filters {
+  padding: 16px 24px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+.jira-filters-row {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 12px;
+}
+.jira-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+     .jira-filter-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+}
+.jira-selection-controls {
+display: none;
+}
+     .jira-select {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+  min-width: 140px;
+  font-family: inherit;
+}
+.jira-search-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.jira-search-section label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+.jira-selection-count {
+  text-align: right;
+  padding: 8px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #e5e7eb;
+  color: #8b5cf6;
+  font-weight: 600;
+  font-size: 13px;
+  flex-shrink: 0;
+  width: auto; /* Ensure it expands to content width */
+  overflow: visible; /* Ensure text is not clipped */
+  white-space: nowrap; /* Prevent text from wrapping */
+}
+.jira-jql-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+}
+     .jira-search-btn {
+  background: #8b5cf6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.jira-search-btn:hover {
+  background: #7c3aed;
+}
+     .jira-stories-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: white;
+}
+.jira-stories-table th {
+  background: #f8fafc;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 13px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  vertical-align: middle;
+}
+.jira-stories-table th.select-column {
+    width: 50px !important;
+    text-align: center !important;
+    padding: 12px 8px !important;
+    vertical-align: middle !important;
+}
+.jira-stories-table th,
+.jira-stories-table td {
+    padding: 10px;  
+    vertical-align: middle;  
+    border-bottom: 1px solid #f1f5f9;  
+}
+     
+     .jira-header-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #753acb;
+  cursor: pointer;
+}
+     .jira-header-checkbox:indeterminate {
+  background-color: #753acb;
+  border-color: #753acb;
+}
+.jira-stories-table th.select-column,
+.jira-stories-table td.checkbox-cell {
+    width: 50px !important;
+    text-align: center !important;
+    padding: 12px 8px !important;
+    vertical-align: middle !important;
+}
+.jira-header-checkbox,
+.jira-story-checkbox {
+    width: 18px !important;
+    height: 18px !important;
+    accent-color: #8b5cf6 !important;
+    cursor: pointer !important;
+    margin: 0 auto !important;
+    display: block !important;
+    vertical-align: middle !important;
+}
+     .jira-header-checkbox:indeterminate::before {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 2px;
+  background: white;
+  margin: 7px auto;
+}
+
+.jira-stories-container {
+  flex: 1;
+  overflow: hidden;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+     .jira-stories-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: white;
+}
+
+.jira-stories-table-wrapper {
+    flex: 1; 
+    overflow: auto;  
+    padding: 0 24px 0px 24px;  
+    border-bottom: none;    
+
+}
+.jira-selection-count-overlay {
+  position: absolute;
+  top: 12px;
+  right: 32px;
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 10;
+}
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #753acb;
+}
+
+/* Story item styles */
+.jira-story-item {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.jira-story-item:hover {
+  border-color: #753acb;
+  box-shadow: 0 2px 8px rgba(117, 58, 203, 0.1);
+}
+
+.jira-story-item.selected {
+  border-color: #753acb;
+  background: #f8f5ff;
+}
+
+.jira-story-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #753acb;
+  cursor: pointer;
+}
+
+     .jira-stories-table tr {
+  transition: all 0.2s ease;
+}
+
+.jira-stories-table tr:hover {
+  background: #f9fafb;
+}
+  .jira-stories-table tr.selected {
+  background: #f0e6ff;
+  border-left: 3px solid #753acb;
+}
+.jira-stories-table tr.selected:hover {
+  background: #e8d8ff;
+}
+
+
+.jira-story-content {
+  flex: 1;
+}
+
+.jira-story-key {
+  font-weight: 700;
+  color: #753acb;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.jira-story-summary {
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.jira-story-meta {
+  display: flex;
+  gap: 15px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.jira-story-type, .jira-story-status, .jira-story-priority {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.checkbox-cell {
+  text-align: center;
+  vertical-align: middle;
+  width: 40px;
+  padding: 0 !important;
+}
+.checkbox-cell input[type="checkbox"] {
+  margin: auto;
+  display: block;
+}
+.jira-type-icon, .jira-status-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  display: inline-block;
+}
+    .jira-stories-table th {
+  background: #f8fafc;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 13px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+          .jira-stories-table th.key-column {
+  width: 90px;
+}
+.jira-stories-table th.status-column {
+  width: 120px;
+}
+.jira-stories-table th.key-column,
+.jira-stories-table td.key-cell {
+  width: 100px;
+}
+.jira-stories-table th.status-column,
+.jira-stories-table td.status-cell {
+  width: 120px;
+}
+.jira-stories-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  font-size: 14px;
+  color: #334155;
+}
+
+.jira-stories-table tr:hover {
+  background: #f8fafc;
+}
+
+.jira-stories-table tr.selected {
+  background: #f3f0ff;
+  border-left: 3px solid #8b5cf6;
+}
+
+/* Typography for story content */
+.jira-story-key {
+  font-weight: 700;
+  color: #8b5cf6;
+  font-size: 13px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.jira-story-summary {
+  color: #374151;
+  line-height: 1.4;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+ .jira-story-status {
+        background: none !important;
+        color: inherit !important;
+        border: none !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+        font-weight: normal !important;
+    }
+
+/* Modal Footer */
+.jira-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.jira-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.jira-btn-primary {
+  background: #8b5cf6;
+  color: white;
+  border-color: #8b5cf6;
+}
+
+.jira-btn-primary:hover {
+  background: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.jira-btn-primary:disabled {
+  background: #9ca3af;
+  border-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.jira-btn-cancel {
+  background: white;
+  color: #6b7280;
+  border-color: #d1d5db;
+}
+
+.jira-btn-cancel:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+/* Loading state */
+#jiraLoadingIndicator {
+  padding: 40px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+.jira-filters {
+  padding: 16px 24px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+     
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .jira-filters-row {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 12px;
+}
+  
+.jira-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+  
+.jira-search-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+  
+  .jira-stories-table {
+    font-size: 13px;
+  }
+  
+  .jira-stories-table th,
+  .jira-stories-table td {
+    padding: 8px;
+  }
+}
+     
+</style>
+     <style>
+/* JIRA Modal - Perfect Layout with Scrolling and Fixed Buttons */
+#jiraImportModal .jira-modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 850px;
+  width: 90%;
+  height: 85vh; /* Fixed height to ensure scrolling works */
+  max-height: 85vh;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Modal Header - Fixed */
+.jira-modal-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: white;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.jira-modal-header h3 {
+  margin: 0;
+  color: #8b5cf6;
+  font-size: 18px;
+  font-weight: 600;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Filters Section - Fixed */
+.jira-filters {
+  padding: 16px 24px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.jira-filters-row {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 12px;
+}
+
+.jira-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.jira-filter-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.jira-select {
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+  min-width: 140px;
+  font-family: inherit;
+}
+
+.jira-search-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.jira-search-section label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.jira-jql-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+}
+
+.jira-search-btn {
+  background: #8b5cf6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.jira-search-btn:hover {
+  background: #7c3aed;
+}
+
+/* Stories Container - Scrollable Middle Section */
+.jira-stories-container {
+  flex: 1; /* Takes remaining space */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: white;
+  min-height: 0; /* Important for flex scrolling */
+}
+
+.jira-stories-table-wrapper {
+  flex: 1;
+  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden;
+  padding: 0 24px;
+  min-height: 0; /* Important for flex scrolling */
+}
+
+/* Scrollbar styling */
+.jira-stories-table-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.jira-stories-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.jira-stories-table-wrapper::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.jira-stories-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Table Styling with Perfect Checkbox Alignment */
+.jira-stories-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: white;
+}
+
+.jira-stories-table th {
+  background: #f8fafc;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+  font-size: 13px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  vertical-align: middle;
+}
+
+.jira-stories-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  font-size: 14px;
+  color: #334155;
+}
+
+/* Perfect Checkbox Column Alignment */
+.jira-stories-table th.select-column,
+.jira-stories-table td.checkbox-cell {
+  width: 50px;
+  text-align: center;
+  padding: 12px 8px;
+  vertical-align: middle;
+}
+
+/* Column Widths */
+.jira-stories-table th.key-column,
+.jira-stories-table td.key-cell {
+  width: 100px;
+}
+
+.jira-stories-table th.status-column,
+.jira-stories-table td.status-cell {
+  width: 120px;
+}
+
+/* Story Content Styling */
+.jira-story-key {
+  font-weight: 700;
+  color: #8b5cf6;
+  font-size: 13px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.jira-story-summary {
+  color: #374151;
+  line-height: 1.4;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.jira-story-status {
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+  font-family: 'Segoe UI', sans-serif;
+  display: inline-block;
+}
+
+/* Status Colors */
+.jira-story-status[data-status="To Do"] {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.jira-story-status[data-status="In Progress"] {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.jira-story-status[data-status="Done"] {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* Row Selection */
+.jira-stories-table tr:hover {
+  background: #f8fafc;
+}
+
+.jira-stories-table tr.selected {
+  background: #f3f0ff;
+  border-left: 3px solid #8b5cf6;
+}
+
+/* Selection Count Bar - Always Visible */
+.jira-selection-count {
+  text-align: right;
+  padding: 8px 24px;
+  background: #f8fafc;
+  border-top: 1px solid #e5e7eb;
+  color: #8b5cf6;
+  font-weight: 600;
+  font-size: 13px;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Modal Footer - Always Visible at Bottom */
+.jira-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: white;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.jira-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.jira-btn-primary {
+  background: #8b5cf6;
+  color: white;
+  border-color: #8b5cf6;
+}
+
+.jira-btn-primary:hover {
+  background: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.jira-btn-primary:disabled {
+  background: #9ca3af;
+  border-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.jira-btn-cancel {
+  background: white;
+  color: #6b7280;
+  border-color: #d1d5db;
+}
+
+.jira-btn-cancel:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.jira-instructions {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 20px 0;
+  font-size: 14px;
+}
+
+.instruction-item {
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.instruction-item:last-of-type {
+  margin-bottom: 8px;
+}
+
+.instruction-note {
+  background: #e3f2fd;
+  border-left: 3px solid #2196f3;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.instruction-item strong {
+  color: #8b5cf6;
+}
+
+.instruction-note strong {
+  color: #1976d2;
+}  
+
+   /* Fix checkbox alignment in Jira import table */
+#jiraStoriesTable th.checkbox-cell,
+#jiraStoriesTable td.checkbox-cell {
+  text-align: center;
+  vertical-align: middle;
+  width: 40px;
+  padding: 0;
+}
+#jiraStoriesTable input[type="checkbox"] {
+  margin: 0;
+  display: block;
+}
+
+/* Force story key text to black */
+.jira-story-key {
+  color: #000 !important;
+  font-weight: 500;
+  text-decoration: none;
+}
+     /* Force checkbox alignment in Jira modal table */
+#jiraStoriesTable th.checkbox-cell,
+#jiraStoriesTable td.checkbox-cell {
+  text-align: center !important;
+  vertical-align: middle !important;
+  width: 40px !important;
+  padding: 0 !important;
+}
+
+#jiraStoriesTable th.checkbox-cell {
+  height: 40px; /* keeps header checkbox centered vertically */
+}
+
+#jiraStoriesTable td.checkbox-cell input[type="checkbox"],
+#jiraStoriesTable th.checkbox-cell input[type="checkbox"] {
+  margin: auto !important;
+  display: block !important;
+  position: relative;
+  top: 0;
+}
+  .switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  vertical-align: middle;
+}
+.switch input {display:none;}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0;
+  right: 0; bottom: 0;
+  background-color: #ccc;
+  border-radius: 14px;
+  transition: .2s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px; width: 16px;
+  left: 2px; bottom: 2px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: .2s;
+}
+input:checked + .slider {background-color: #673ab7;}
+input:checked + .slider:before {transform: translateX(16px);}
+       
+/* Make sure profile menu items align properly */
+.profile-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 8px 16px;        /* add enough horizontal padding */
+  font-size: 14px;
+  color: #333;
+  box-sizing: border-box;   /* important: keeps switch inside */
+}
+
+.profile-menu-item span {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* Toggle switch container */
+.profile-menu-item .switch {
+  margin-left: auto;        /* push it to the right */
+  margin-right: 0;          /* prevent overflow */
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+/* Hide default checkbox */
+.profile-menu-item .switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Slider track */
+.profile-menu-item .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 22px;
+}
+
+/* Slider knob */
+.profile-menu-item .slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+/* Active (checked) state */
+.profile-menu-item .switch input:checked + .slider {
+  background-color: #673ab7;
+}
+
+.profile-menu-item .switch input:checked + .slider:before {
+  transform: translateX(18px);
+}     
+     </style>
+        <style>
+      .host-toggle-disabled {
+        opacity: 0.6;
+        pointer-events: none; /* Prevents interactions */
+      }
+
+      .host-toggle-disabled .toggle-switch {
+        background-color: #28a745 !important; /* Or use any visually distinct color */
+      }
+
+      .host-toggle-disabled::after {
+        content: " (Host)";
+        font-size: 12px;
+        color: #28a745; /* Or another suitable color */
+        font-weight: bold; /* Make it stand out */
+      }
+    </style>
+</head>
+<body>
+
+    <header>
+  <div class="logo">
+    <img src="spade_1.png" alt="Simply Poker" />
+    <span class="logo-text">Simply Poker</span>
+
+  </div>
+  <div class="nav-links">    
+   <button class="invite-button" id="inviteButton">Invite Others</button>    
+    <!-- New user display element -->
+  <div class="current-user-display" id="profileMenuTrigger" style="cursor:pointer;position:relative;">
+    <div class="user-avatar" id="headerUserAvatar"></div>
+    <span id="headerUsername">User</span>
+    
+  </div>
+   </div>
+      <!-- Profile Dropdown Menu -->
+<div id="profileMenu" class="profile-menu">
+  <div class="profile-menu-header">
+    <img id="profileMenuAvatar" class="profile-avatar" src="" alt="avatar">
+    <div>
+      <div class="profile-menu-name" id="profileMenuName">User</div>
+      <div class="profile-menu-email" id="profileMenuEmail" style="font-size:12px;color:#555;"></div>
+    </div>
+  </div>
+<!-- Change Language -->
+<button class="profile-menu-item" onclick="showLanguageModal()">
+              <img src="https://flagcdn.com/gb.svg" alt="UK Flag" class="flag-icon" />&nbsp;Change Language
+            </button>   
+ <!-- Host Mode Toggle in Profile Menu -->
+<div class="profile-menu-item" style="display:flex;justify-content:space-between;align-items:center;">
+  <span>
+    <i class="fas fa-user-shield" style="margin-right:8px;color:#673ab7;"></i>
+    Host mode
+  </span>
+  <label class="switch">
+    <input type="checkbox" id="hostModeToggle">
+    <span class="slider round"></span>
+  </label>
+</div>
+
+ <!-- Modal shown if someone else is already host -->
+<div id="hostExistsModal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+     background-color: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 10000;">
+  <div class="modal-content">
+    <h3>Host Already Present</h3>
+    <p>Another user is already the host in this session.</p>
+    <div class="button-group">
+      <button id="hostExistsOkBtn">Okay</button>
+    </div>
+  </div>
+</div>  
+
+<!-- Import from CSV -->
+<button class="profile-menu-item" id="uploadTicketMenuBtn"> <svg xmlns="http://www.w3.org/2000/svg" 
+viewBox="0 0 640 640" width="16" height="16" fill="currentColor" class="menu-icon">
+<path d="M192 64C156.7 64 128 92.7 128 128L128 368L310.1 368L279.1 337C269.7 327.6 269.7 312.4 279.1 303.1C288.5 293.8 303.7 293.7 313 303.1L385 375.1C394.4 384.5 394.4 399.7 385 409L313 481C303.6 490.4 288.4 490.4 279.1 481C269.8 471.6 269.7 456.4 279.1 447.1L310.1 416.1L128 416.1L128 512.1C128 547.4 156.7 576.1 192 576.1L448 576.1C483.3 576.1 512 547.4 512 512.1L512 234.6C512 217.6 505.3 201.3 493.3 189.3L386.7 82.7C374.7 70.7 358.5 64 341.5 64L192 64zM453.5 240L360 240C346.7 240 336 229.3 336 216L336 122.5L453.5 240z"/> </svg> Import from CSV </button>
+
+<!-- Import from JIRA -->
+
+  <button class="profile-menu-item" id="jiraImportMenuBtn">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+             width="16" height="16" fill="currentColor" class="menu-icon">
+          <path d="M11.53 2c0 2.4 1.97 4.37 4.37 4.37h.1v.1c0 2.4
+                   1.97 4.37 4.37 4.37V2H11.53zM2 11.53c2.4 0
+                   4.37 1.97 4.37 4.37v.1h.1c2.4 0 4.37 1.97
+                   4.37 4.37H2V11.53z"/>
+        </svg>
+        Import from JIRA
+      </button>     
+
+   <!-- Export button here -->
+  <button class="profile-menu-item" id="exportToCsvMenuBtn">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="16" height="16" fill="currentColor" class="menu-icon">
+      <path d="M128.5 64C93.2 64 64.5 92.7 64.5 128L64.5 512C64.5 547.3 93.2 576 128.5 576L384.5 576C419.8 576 448.5 547.3 448.5 512L448.5 416L526.6 416L495.6 447C486.2 456.4 486.2 471.6 495.6 480.9C505 490.2 520.2 490.3 529.5 480.9L601.5 408.9C610.9 399.5 610.9 384.3 601.5 375L529.5 303C520.1 293.6 504.9 293.6 495.6 303C486.3 312.4 486.2 327.6 495.6 336.9L526.6 367.9L448.5 367.9L448.5 234.4C448.5 217.4 441.8 201.1 429.8 189.1L323.2 82.7C311.2 70.7 295 64 278 64L128.5 64zM390 240L296.5 240C283.2 240 272.5 229.3 272.5 216L272.5 122.5L390 240zM256.5 392C256.5 378.7 267.2 368 280.5 368L384.5 368L384.5 416L280.5 416C267.2 416 256.5 405.3 256.5 392z"/>
+    </svg>
+    Export to CSV
+  </button>    
+
+<!-- Logout -->
+  <button class="profile-menu-item logout" id="logoutMenuBtn">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
+       width="20" height="20" fill="currentColor" class="menu-icon">
+    <path d="M224 160C241.7 160 256 145.7 256 128C256 110.3 241.7 96 224 96L160 96C107 96 64 139 64 192L64 448C64 501 107 544 160 544L224 544C241.7 544 256 529.7 256 512C256 494.3 241.7 480 224 480L160 480C142.3 480 128 465.7 128 448L128 192C128 174.3 142.3 160 160 160L224 160zM566.6 342.6C579.1 330.1 579.1 309.8 566.6 297.3L438.6 169.3C426.1 156.8 405.8 156.8 393.3 169.3C380.8 181.8 380.8 202.1 393.3 214.6L466.7 288L256 288C238.3 288 224 302.3 224 320C224 337.7 238.3 352 256 352L466.7 352L393.3 425.4C380.8 437.9 380.8 458.2 393.3 470.7C405.8 483.2 426.1 483.2 438.6 470.7L566.6 342.7z"/>
+  </svg>
+  Logout
+</button>
+
+     
+
+ <!-- Language Selection Modal -->
+<div id="languageModalCustom" style="display: none;">
+  <div class="language-modal-content">
+    <div class="language-modal-header">
+      <h3>🌐 Select Language</h3>
+      <button class="close-button" onclick="hideLanguageModal()">&times;</button>
+    </div>
+    <div class="language-grid" id="languageGrid">
+      <!-- Languages will be populated dynamically -->
+    </div>
+    <div class="language-modal-footer">
+      <button id="applyLanguageBtn" class="language-apply-btn">Apply Changes</button>
+      <button onclick="hideLanguageModal()" class="language-cancel-btn">Cancel</button>
+    </div>
+  </div>
+</div>     
+</header>
+<!-- Create a completely new custom invite modal that doesn't use the same ID or classes as the original -->
+<div id="inviteModalCustom">
+<div class="modal-content">
+<h3>Invite Link</h3>
+<input id="inviteLinkCustom" readonly="" type="text"/>
+<div class="button-group">
+<button onclick="copyInviteLinkCustom()">Copy Link</button>
+<button onclick="hideInviteModalCustom()">Close</button>
+</div>
+</div>
+</div>
+<!-- Custom Login Modal -->
+<div id="loginModalCustom" style="display: none;">
+  <div class="modal-content">
+    <h3>Join Planning Poker Session</h3>
+    <p>Please enter your name to join the session</p>
+    <input id="userNameInput" type="text" placeholder="Your name" />
+    <div class="button-group">
+      <button id="joinSessionWithName" class="action-button">Join Session</button>
+    </div>
+  </div>
+</div>    
+<!-- Custom Add Ticket Modal -->
+<div id="addTicketModalCustom" style="display: none;">
+  <div class="modal-content add-ticket-modal">
+    <h3>Add New Ticket</h3>
+    <div class="input-group">
+      <label for="ticketNameInput">ID</label>
+      <input id="ticketNameInput" type="text" placeholder="Enter ticket ID">
+    </div>
+    <div class="input-group">
+      <label for="ticketDescriptionEditor">Comment</label>
+      <div id="ticketDescriptionEditor"></div>
+    </div>
+    <div class="button-group">
+      <button id="cancelAddTicket" class="cancel-button">CANCEL</button>
+      <button id="confirmAddTicket" class="confirm-button">
+        <span class="plus-icon">+</span> ADD
+      </button>
+    </div>
+  </div>
+</div> 
+<!-- Add this modal if it doesn't exist -->
+<div id="hostModeErrorModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:white; padding:24px 32px; border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,0.2); max-width:350px; text-align:center;">
+    <h2 style="margin-bottom:12px;color:#e53935;">Cannot become host</h2>
+    <p style="margin-bottom:16px;">There is already another host in this session. Only one host is allowed per room.</p>
+    <button onclick="document.getElementById('hostModeErrorModal').style.display='none';"
+            style="padding:8px 16px; background:#753acb; color:white; border:none; border-radius:5px; cursor:pointer;">
+      OK
+    </button>
+  </div>
+</div>
+<!-- CSV Upload Modal -->
+<div id="csvUploadModal" style="display: none;">
+  <div class="csv-modal-content">
+    <!-- Step 1: File Upload -->
+    <div id="csvUploadStep" class="csv-step active">
+      <div class="csv-modal-header">
+        <h3>Import from CSV file</h3>
+        <button class="close-button" onclick="hideCsvUploadModal()">&times;</button>
+      </div>
+      
+      <div class="csv-upload-section">
+        <div class="csv-checkbox-container">
+          <label class="csv-checkbox-label">
+            <input type="checkbox" id="useFirstRowAsHeaders" checked>
+            <span class="checkmark"></span>
+            Use first csv row as headers
+          </label>
+        </div>
+        
+        <div class="csv-dropzone" id="csvDropzone">
+          <div class="csv-drop-content">
+            <div class="csv-drop-icon">📄</div>
+            <div class="csv-drop-text">
+              <span>Drag 'n' drop some files here, or </span>
+             
+                 <button class="csv-choose-file-btn" type="button" onclick="triggerCsvFileInput()">choose file</button>
+            </div>
+          </div>
+          <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+        </div>
+      </div>
+    </div>
+    
+    <!-- Step 2: Field Mapping -->
+    <div id="csvMappingStep" class="csv-step">
+      <div class="csv-modal-header">
+        <button class="csv-back-btn" onclick="goBackToCsvUpload()">←</button>
+        <h3>Import from CSV file</h3>
+        <button class="close-button" onclick="hideCsvUploadModal()">&times;</button>
+      </div>
+      
+      <div class="csv-mapping-section">
+        <div class="csv-mapping-dropdowns">
+        <div class="csv-mapping-item">
+            <label>Summary (required)</label>
+            <select id="summaryMapping" class="csv-mapping-select" required>
+              <option value="">Select...</option>
+            </select>
+          </div>
+          
+          <div class="csv-mapping-item">
+            <label>Key</label>
+            <select id="keyMapping" class="csv-mapping-select">
+              <option value="">Select...</option>
+            </select>
+          </div>
+          
+          <div class="csv-mapping-item">
+            <label>Description</label>
+            <select id="descriptionMapping" class="csv-mapping-select">
+              <option value="">Select...</option>
+            </select>
+          </div>
+          
+          <div class="csv-mapping-item">
+            <label>Link</label>
+            <select id="linkMapping" class="csv-mapping-select">
+              <option value="">Select...</option>
+            </select>
+          </div>
+          
+          <div class="csv-mapping-item">
+            <label>Estimate</label>
+            <select id="estimateMapping" class="csv-mapping-select">
+              <option value="">Select...</option>
+            </select>
+          </div>
+        </div>
+
+            <!-- ✅ Add preview container here -->
+    <div id="importPreview" 
+         style="margin-top:15px; max-height:200px; overflow:auto; 
+                border:1px solid #ccc; padding:8px; font-size:0.9em;">
+    </div> 
+           
+        <div class="csv-modal-footer">
+  <button class="csv-cancel-btn" onclick="hideCsvUploadModal()">Cancel</button>
+  <button id="importCsvBtn" class="csv-import-btn">Import Issues</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Export CSV Modal -->
+<div id="exportCsvModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Export Stories to CSV</h2>
+    </div>
+    <div class="modal-body">
+      <div class="export-section">
+        <h3>Field Mapping</h3>
+        <p>Map your story fields to CSV columns:</p>
+        <div class="field-mapping">
+  <div class="mapping-row">
+    <label>Story ID:</label>
+    <select id="storyIdMapping" class="mapping-select">
+      <option value="id" selected>Export Story ID</option>
+      <option value="skip">Skip this field</option>
+    </select>
+  </div>
+  
+  <div class="mapping-row">
+    <label>Title:</label>
+    <select id="titleMapping" class="mapping-select">
+      <option value="title" selected>Export Title</option>
+      <option value="skip">Skip this field</option>
+    </select>
+  </div>
+  
+  <div class="mapping-row">
+    <label>Description:</label>
+    <select id="descriptionMapping" class="mapping-select">
+      <option value="description" selected>Export Description</option>
+      <option value="skip">Skip this field</option>
+    </select>
+  </div>
+  
+  <div class="mapping-row">
+    <label>Story Points:</label>
+    <select id="storyPointsMapping" class="mapping-select">
+      <option value="storyPoints" selected>Export Story Points</option>
+      <option value="skip">Skip this field</option>
+    </select>
+  </div>
+  
+  <div class="mapping-row">
+    <label>Vote Count:</label>
+    <select id="voteCountMapping" class="mapping-select">
+      <option value="voteCount">Export Vote Count</option>
+      <option value="skip" selected>Skip this field</option>
+    </select>
+  </div>
+  
+  <div class="mapping-row">
+    <label>Average Vote:</label>
+    <select id="averageVoteMapping" class="mapping-select">
+      <option value="averageVote">Export Average Vote</option>
+      <option value="skip" selected>Skip this field</option>
+    </select>
+  </div>
+</div>
+
+        
+        <div class="export-options">
+          <h3>Export Options</h3>
+          <div class="export-options-inline">
+            <label><input type="checkbox" id="includeHeader" checked> Include header row</label>
+            <label><input type="checkbox" id="onlyRevealedStories"> Only export stories with revealed votes</label>
+            <label><input type="checkbox" id="includeVoteDetails"> Include detailed vote information</label>
+          </div>
+        </div>
+        
+        <div class="preview-section">
+          <h3>Preview</h3>
+          <div id="exportPreviewTable" class="export-preview-table-container" style="max-height: 300px; overflow: auto; border: 1px solid #e0e0e0; border-radius: 8px;">
+            <!-- Table preview will be generated here -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button id="generatePreviewBtn" class="btn btn-secondary">Update Preview</button>
+      <button id="exportCsvBtn" class="btn btn-primary">Export CSV</button>
+      <button id="cancelExportBtn" class="btn btn-cancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- JIRA Import Modal - Add this before </body> -->
+<div id="jiraImportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10004; align-items: center; justify-content: center;">
+  <div class="jira-modal-content">
+    
+    <!-- Step 1: Connection Setup -->
+    <div id="jiraConnectionStep" class="jira-step active">
+      <div class="jira-modal-header">
+        <h3>🔗 Connect to JIRA</h3>
+        <button class="close-button" onclick="hideJiraImportModal()">&times;</button>
+      </div>
+      
+      <div class="jira-connection-section">
+        <div class="jira-form-group">
+          <label for="jiraUrl">JIRA Instance URL:</label>
+          <input type="url" id="jiraUrl" placeholder="https://yourcompany.atlassian.net" class="jira-input">
+        </div>
+        
+        <div class="jira-form-group">
+          <label for="jiraEmail">Email:</label>
+          <input type="email" id="jiraEmail" placeholder="your-email@company.com" class="jira-input">
+        </div>
+        
+        <div class="jira-form-group">
+          <label for="jiraToken">API Token:</label>
+          <input type="password" id="jiraToken" placeholder="Your JIRA API Token" class="jira-input">
+          <small style="color: #666; display: block; margin-top: 5px;">
+            <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" style="color: #673ab7;">Generate API Token here</a>
+          </small>
+        </div>
+        
+        <div class="jira-form-group">
+          <label for="jiraProject">Project Key:</label>
+          <input type="text" id="jiraProject" placeholder="e.g., PROJ, DEV, TEST" class="jira-input">
+        </div>
+
+<!-- Add this instruction section -->
+<div class="jira-instructions">
+  <div class="instruction-item">
+    <strong>🚀 Smart Connect:</strong> Automatically tests your connection and discovers available projects. Use this if you're unsure about the project key.
+  </div>
+  <div class="instruction-item">
+    <strong>🔗 Connect & Load Stories:</strong> Directly connects using the details above and loads stories from the specified project.
+  </div>
+  <div class="instruction-note">
+    <strong>💡 Tip:</strong> You can find your project key in JIRA by going to Project Settings → Details, or it's usually shown in issue keys (e.g., "PROJ-123").
+  </div>
+</div>
+
+<div id="jiraConnectionStatus" class="connection-status-indicator" style="display: none;">
+  <span class="status-text"></span>
+</div>
+        
+        <div id="jiraConnectionStatus" class="connection-status-indicator" style="display: none;">
+          <span class="status-text"></span>
+        </div>
+      </div>
+      
+      <div class="jira-modal-footer">
+        
+        <button id="smartJiraConnect" class="jira-btn jira-btn-primary">🚀 Smart Connect</button>   
+        <button id="proceedToStories" class="jira-btn jira-btn-primary" disabled>Connect & Load Stories</button>
+        <button onclick="hideJiraImportModal()" class="jira-btn jira-btn-cancel">Cancel</button>
+      </div>
+    </div>
+    <!-- Step 2: Story Selection with header checkbox -->
+<div id="jiraSelectionStep" class="jira-step">
+  <div class="jira-modal-header">
+    <button class="jira-back-btn" onclick="backToJiraConnection()">←</button>
+    <h3>📋 Select Stories to Import</h3>
+    <button class="close-button" onclick="hideJiraImportModal()">&times;</button>
+  </div>
+  
+  <!-- Compact Filters Section -->
+  <div class="jira-filters">
+    <!-- Status and Issue Type in single row -->
+    <div class="jira-filters-row">
+      <div class="jira-filter-group">
+        <label for="jiraStatusFilter">Status:</label>
+        <select id="jiraStatusFilter" class="jira-select">
+          <option value="">All Statuses</option>
+          <!-- Options will be populated dynamically -->
+        </select>
+      </div>
+      
+      <div class="jira-filter-group">
+        <label for="jiraTypeFilter">Issue Type:</label>
+        <select id="jiraTypeFilter" class="jira-select">
+          <option value="">All Types</option>
+          <!-- Options will be populated dynamically -->
+        </select>
+      </div>
+    </div>
+    
+    <!-- JQL Search in separate row -->
+    <div class="jira-search-section">
+      <label for="jiraJqlInput">JQL:</label>
+      <input type="text" 
+             id="jiraJqlInput" 
+             class="jira-jql-input" 
+             placeholder="ORDER BY Rank ASC"
+             value="">
+      <button id="jiraSearchBtn" class="jira-search-btn">SEARCH JIRA</button>
+    </div>
+  </div>
+  
+  <!-- Stories Container with Fixed Height and Scroll -->
+  <div class="jira-stories-container">
+    <div class="jira-stories-table-wrapper">
+      <table class="jira-stories-table">
+        <thead>
+          <tr>
+            <th class="select-column">
+              <input type="checkbox" 
+                     id="jiraSelectAllCheckbox" 
+                     class="jira-header-checkbox"
+                     title="Select/Deselect All">
+            </th>
+            <th class="key-column">Key</th>
+            <th class="status-column">Status</th>
+            <th class="name-column">Description</th>
+          </tr>
+        </thead>
+        <tbody id="jiraStoriesTableBody">
+          <!-- Stories will be populated here -->
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Selection Count Bar - Always Visible -->
+    <div class="jira-selection-count">
+      <span id="selectedCount">0 selected</span>
+    </div>
+    
+    <div id="jiraLoadingIndicator" style="display: none; text-align: center; padding: 40px; color: #666;">
+      <div class="loading-spinner"></div>
+      Loading JIRA stories...
+    </div>
+  </div>
+  
+  <!-- Footer Actions - Always Visible at Bottom -->
+  <div class="jira-modal-footer">
+    <button id="importSelectedStories" class="jira-btn jira-btn-primary" disabled>
+      Import Selected Stories
+    </button>
+    <button onclick="hideJiraImportModal()" class="jira-btn jira-btn-cancel">
+      Cancel
+    </button>
+  </div>
+</div>
+  </div>
+</div>   
+
+<div class="upload-section">
+<div class="upload-right">
+<div class="file-input" id="fileInputContainer">
+<!--  <span class="file-button">Upload Ticket</span> -->
+<input accept=".csv" id="csvInput" type="file"/>
+</div>
+
+</div>
+</div>
+
+<div class="container">
+<div class="sidebar">
+<h3>Current Members</h3>
+<div id="userList"></div>
+<!-- <h3 class="section-heading">Voting Controls</h3> -->
+<!-- Added controls-section for better styling of control buttons -->
+<div class="controls-section">
+<button class="button" id="revealVotesBtn">Reveal Votes</button>
+<button class="button" id="resetVotesBtn">Reset Votes</button>
+<!-- <button class="button" id="exportCsvBtn">Export All Votes</button> -->
+</div>
+</div>
+<div class="main">
+<!-- Story will be displayed in the poker-table-layout instead of here -->
+<!-- New poker table layout will be rendered here -->
+<div class="user-circle-container" id="userCircle"></div>
+<!-- Simple no stories message -->
+<div class="no-stories-message" id="noStoriesMessage">
+        No stories available. Please upload or add stories to start voting.
+      </div> 
+<!-- Planning cards -->
+<div class="planning-cards-section">     
+<h3>Planning Cards</h3>
+     <div class="card-panel">
+<div class="cards" id="planningCards">
+<!--  <div class="card" data-value="0" draggable="true">0</div>
+<div class="card" data-value="1" draggable="true">1</div>
+<div class="card" data-value="3" draggable="true">3</div>
+<div class="card" data-value="5" draggable="true">5</div>
+<div class="card" data-value="8" draggable="true">8</div>
+<div class="card" data-value="13" draggable="true">13</div>
+<div class="card" data-value="21" draggable="true">21</div> -->    
+</div>    
+</div>
+</div>
+</div>
+<div class="rightbar" id="storyListContainer">
+<!-- Search box -->
+<div class="search-container">
+  <input type="text" id="ticketSearch" placeholder="Search and filter tickets...">
+  <button id="filterBtn"><i class="fa fa-filter"></i></button>
+</div>
+
+<!-- Added ID to the ADD TICKET button -->
+<button class="add-ticket-btn" id="addTicketBtn"><span>+</span>ADD TICKET</button>
+<!-- The story list CONTAINER with no hardcoded stories -->
+<div class="story-container" id="storyList">
+<!-- Stories will be loaded dynamically -->
+</div>
+<!-- Navigation buttons -->
+<div class="navigation-buttons">
+<button class="button" id="prevStory">Previous Story</button>
+<button class="button" id="nextStory">Next Story</button>
+</div>
+</div>
+</div>
+<!-- Scripts -->
+
+<script>
+     // Get values from sessionStorage
+
+  const userName = sessionStorage.getItem("userName");
+  const requestedHost = sessionStorage.getItem("requestedHost") === "true";
+
+function updateHeaderStyle() {
+  const style = document.createElement('style');
+  style.textContent = `
+    /* Reset header styles to match the image */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: white;
+      border-bottom: 1px solid #f0f0f0;
+      height: 60px;
+      box-sizing: border-box;
+    }
+    
+    /* Logo and text styling */
+    .logo {
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo img {
+      width: 32px;
+      height: 32px;
+      margin-right: 12px;
+    }
+    
+    .logo span {
+      font-size: 20px;
+      font-weight: bold;
+      color: #000;
+      letter-spacing: 0.5px;
+    }
+    
+    /* Nav links styling */
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    /* Keep existing buttons but adjust general navigation style */
+    .nav-links a, 
+    .nav-links button:not(#logOffBtn):not(.current-user-display) {
+      text-decoration: none;
+      color: #555;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    /* Don't modify these elements */
+    #headerUsername,
+    #headerUserAvatar,
+    #logOffBtn,
+    .current-user-display {
+      /* Preserve existing styles */
+    }
+  `;
+  document.head.appendChild(style);
+  
+  // Optionally, update the logo element if needed
+  const logoElement = document.querySelector('.logo img');
+  if (logoElement) {
+    // Update to a solid black spade if it's not already
+    // Only do this if the logo needs updating
+    // logoElement.src = 'blackspade.png'; 
+  }
+}
+     
+    // Function to check if there are any stories and update UI accordingly
+    function checkForStories() {
+      const storyList = document.getElementById('storyList');
+      const noStoriesMessage = document.getElementById('noStoriesMessage');
+      const planningCards = document.querySelectorAll('#planningCards .card');
+      
+      // Check if there are any story cards
+      const storyCards = storyList ? storyList.querySelectorAll('.story-card') : [];
+      const hasStories = storyCards.length > 0;
+      
+      if (!hasStories) {
+        // No stories - disable planning cards
+        planningCards.forEach(card => {
+          card.classList.add('disabled');
+          card.setAttribute('draggable', 'false');
+        });
+        
+        // Show no stories message
+        if (noStoriesMessage) {
+          noStoriesMessage.style.display = 'block';
+        }
+      } else {
+        // Has stories - enable planning cards
+        planningCards.forEach(card => {
+          card.classList.remove('disabled');
+          card.setAttribute('draggable', 'true');
+        });
+        
+        // Hide no stories message
+        if (noStoriesMessage) {
+          noStoriesMessage.style.display = 'none';
+        }
+      }
+    }
+// Initialize the user display in header - improved version
+
+function initUserHeaderDisplay() {
+  // Get username from session storage - prioritize the one set through login modal
+  const username = sessionStorage.getItem('userName') || 'Guest';
+  const usernameEl = document.getElementById('headerUsername');
+  const avatarEl = document.getElementById('headerUserAvatar');
+  
+  if (usernameEl) usernameEl.textContent = username;
+  
+  if (avatarEl) {
+    // Use the same avatar generation as the main app (generateAvatarUrl function already exists in main.js)
+    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=random&rounded=true`;
+    
+    avatarEl.innerHTML = `<img src="${avatarUrl}" alt="${username}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+    
+    // Fallback if image fails
+    const imgElement = avatarEl.querySelector('img');
+    if (imgElement) {
+      imgElement.onerror = function() {
+        const initials = username.split(' ')
+          .map(part => part.charAt(0))
+          .join('')
+          .toUpperCase()
+          .substring(0, 2);
+          
+        avatarEl.innerHTML = initials;
+        
+        const hue = Math.abs(username.split('').reduce((a, b) => {
+          return a + b.charCodeAt(0);
+        }, 0) % 360);
+        
+        avatarEl.style.backgroundColor = `hsl(${hue}, 70%, 60%)`;
+        avatarEl.style.color = 'white';
+        avatarEl.style.display = 'flex';
+        avatarEl.style.alignItems = 'center';
+        avatarEl.style.justifyContent = 'center';
+        avatarEl.style.fontWeight = 'bold';
+      };
+    }
+  }
+}
+
+// Handle username synchronization and prompt for invited users
+
+document.addEventListener('DOMContentLoaded', function() {
+  // STEP 1: Check for username from main.html (userName with capital N)
+  const storedUserName = sessionStorage.getItem('userName');
+
+  // STEP 2: Check if this is a new user joining via invite link
+  const urlParams = new URLSearchParams(window.location.search);
+  const isJoiningViaInvite = urlParams.has('roomId') && !storedUserName;
+
+  if (isJoiningViaInvite) {
+    // Someone joining via invite link who doesn't have a userName yet
+    sessionStorage.setItem('isHost', 'false');
+    sessionStorage.setItem('isRoomCreator', 'false');
+
+    showLoginModal();
+
+    // Prevent socket connect until user enters name
+    window.userNameReady = false;
+    hideMainContent();
+  } else {
+    window.userNameReady = true;
+
+    if (!sessionStorage.getItem('isHost')) {
+      const isCreator = sessionStorage.getItem('isRoomCreator') === 'true';
+      sessionStorage.setItem('isHost', isCreator ? 'true' : 'false');
+    }
+
+    if (storedUserName) {
+      setTimeout(initUserHeaderDisplay, 100);
+    }
+  }
+
+  // Secure visibility of import buttons (temporary, overridden later by server response)
+  const isHost = sessionStorage.getItem('isHost') === 'true';
+  toggleHostFeatures(isHost);
+
+  // Debugging
+  console.log('Username from sessionStorage:', sessionStorage.getItem('userName'));
+  console.log('Host status (pre-server):', sessionStorage.getItem('isHost'));
+  console.log('Room creator:', sessionStorage.getItem('isRoomCreator'));
+
+  // Keep header updated
+  setInterval(function() {
+    const usernameEl = document.getElementById('headerUsername');
+    const currentStoredUserName = sessionStorage.getItem('userName');
+    if (usernameEl && currentStoredUserName &&
+       (usernameEl.textContent === 'User' || usernameEl.textContent === 'Guest')) {
+      console.log('[HEADER] Fixing header with stored username:', currentStoredUserName);
+      initUserHeaderDisplay();
+    }
+  }, 2000);
+
+  // Attach login modal events
+  const joinButton = document.getElementById('joinSessionWithName');
+  if (joinButton) {
+    joinButton.addEventListener('click', function() {
+      setTimeout(() => {
+        console.log('[LOGIN] Join button clicked, updating header');
+        initUserHeaderDisplay();
+      }, 100);
+    });
+  }
+
+  const userNameInput = document.getElementById('userNameInput');
+  if (userNameInput) {
+    userNameInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        setTimeout(() => {
+          console.log('[LOGIN] Enter pressed, updating header');
+          initUserHeaderDisplay();
+        }, 100);
+      }
+    });
+  }
+
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      setTimeout(function() {
+        const usernameEl = document.getElementById('headerUsername');
+        const currentStoredUserName = sessionStorage.getItem('userName');
+        if (usernameEl && currentStoredUserName && usernameEl.textContent === 'User') {
+          initUserHeaderDisplay();
+        }
+      }, 500);
+    }
+  });
+
+  // === SERVER-CONFIRMED JOIN LOGIC ===
+  const socket = io();
+  const sessionId = urlParams.get("roomId");
+  const userName = sessionStorage.getItem("userName");
+  const requestedHost = sessionStorage.getItem("requestedHost") === "true";
+
+  if (sessionId && userName) {
+    console.log("[CLIENT] Attempting to join session:", sessionId, "as", userName);
+  //  sessionStorage.setItem("isHost", "false");
+    socket.emit("joinSession", { sessionId, requestedHost, name: userName }, (response) => {
+      console.log("[JOIN RESPONSE]", response);
+
+      // Save confirmed host status
+      sessionStorage.setItem("isHost", response.isHost ? "true" : "false");
+
+      // Update UI
+      toggleHostFeatures(response.isHost);
+    });
+  }
+
+  // === LISTEN FOR HOST UPDATES ===
+  socket.on("hostChanged", ({ hostId, userName }) => {
+    if (socket.id === hostId) {
+      sessionStorage.setItem("isHost", "true");
+      toggleHostFeatures(true);
+    } else {
+      sessionStorage.setItem("isHost", "false");
+      toggleHostFeatures(false);
+    }
+    console.log("[SOCKET] Host changed to:", userName);
+  });
+
+  socket.on("hostLeft", () => {
+    console.log("[SOCKET] Host left the session");
+    sessionStorage.setItem("isHost", "false");
+    toggleHostFeatures(false);
+  });
+
+  // === HELPER FUNCTION ===
+  function toggleHostFeatures(enable) {
+    const uploadBtn = document.getElementById('uploadTicketMenuBtn');
+    const exportBtn = document.getElementById('exportToCsvMenuBtn');
+    const jiraImportBtn = document.getElementById('jiraImportMenuBtn');
+
+    if (uploadBtn) uploadBtn.style.display = enable ? 'flex' : 'none';
+    if (exportBtn) exportBtn.style.display = enable ? 'flex' : 'none';
+    if (jiraImportBtn) {
+      jiraImportBtn.style.display = enable ? 'flex' : 'none';
+      if (enable) {
+        jiraImportBtn.addEventListener('click', function() {
+          window.JiraIntegration.showJiraImportModal();
+        });
+      }
+    }
+  }
+});
+
+
+
+
+
+// Setup mobile-specific features
+function setupMobileLayout() {
+  // Only run on mobile devices
+  if (window.innerWidth <= 768) {
+    console.log("Setting up mobile layout");
+    
+    // Create toggle buttons for mobile sections
+    const userListSection = document.getElementById('userList');
+    if (userListSection && userListSection.parentNode) {
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'mobile-toggle-button';
+      toggleBtn.textContent = 'Current Members';
+      toggleBtn.onclick = () => toggleMobileSection(userListSection);
+      
+      userListSection.parentNode.insertBefore(toggleBtn, userListSection);
+      userListSection.classList.add('mobile-collapsible');
+    }
+    
+    // Create toggle for story list container
+    const storyListContainer = document.getElementById('storyList');
+    if (storyListContainer && storyListContainer.parentNode) {
+      const storyToggle = document.createElement('button');
+      storyToggle.className = 'mobile-toggle-button';
+      storyToggle.textContent = 'Story List';
+      storyToggle.onclick = () => toggleMobileSection(storyListContainer);
+      
+      storyListContainer.parentNode.insertBefore(storyToggle, storyListContainer);
+      storyListContainer.classList.add('mobile-collapsible');
+    }
+    
+    // Enable touch for card selection
+    setupMobileCardSelection();
+  }
+}
+
+function toggleMobileSection(element) {
+  element.classList.toggle('active');
+  const button = element.previousElementSibling;
+  if (button && button.classList.contains('mobile-toggle-button')) {
+    button.classList.toggle('active');
+  }
+}
+
+function setupMobileCardSelection() {
+  document.querySelectorAll('#planningCards .card').forEach(card => {
+    // Remove any existing handlers by cloning
+    const newCard = card.cloneNode(true);
+    if (card.parentNode) {
+      card.parentNode.replaceChild(newCard, card);
+    }
+    
+    // Add touch handler
+    newCard.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      
+      // Get current user's vote space
+      const userName = sessionStorage.getItem('userName');
+      if (!userName) return;
+      
+      const safeId = userName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-_]/g, '');
+      const voteSpace = document.getElementById(`vote-space-${safeId}`);
+      
+      if (voteSpace) {
+        const vote = this.getAttribute('data-value');
+        
+        // Clear selections and add to this card
+        document.querySelectorAll('#planningCards .card').forEach(c => {
+          c.classList.remove('selected-card');
+        });
+        this.classList.add('selected-card');
+        
+        // Use the emitVote function if available
+        if (typeof window.emitVote === 'function') {
+          window.emitVote(vote, userName);
+        } else if (typeof window.socket !== 'undefined') {
+          window.socket.emit('castVote', { vote, targetUserId: userName });
+        }
+      }
+    });
+  });
+}
+
+// Listen for orientation changes to fix layout
+window.addEventListener('orientationchange', function() {
+  setTimeout(() => {
+    if (typeof window.fixRevealedVoteFontSizes === 'function') {
+      window.fixRevealedVoteFontSizes();
+    }
+  }, 300);
+});
+
+// Update existing handleLoginSubmit function to call our header update
+const originalHandleLoginSubmit = window.handleLoginSubmit || function() {};
+window.handleLoginSubmit = function() {
+  const username = document.getElementById('userNameInput').value.trim();
+  
+  if (username) {
+    // Store with both key formats for compatibility
+    sessionStorage.setItem('userName', username);
+    console.log(`User joined as: ${username}`);
+    
+    // Hide the modal
+    document.getElementById('loginModalCustom').style.display = 'none';
+    
+    // Mark username as ready
+    window.userNameReady = true;
+    
+    // Show main content
+    if (window.showMainContent) window.showMainContent();
+    
+    // Initialize the app now that we have a username
+    if (window.initializeAppWithName) window.initializeAppWithName(username);
+    
+    // Update header display with the new username
+    setTimeout(initUserHeaderDisplay, 50);
+  } else {
+    // Show validation error - shake the input
+    const input = document.getElementById('userNameInput');
+    input.style.borderColor = '#ff4d4f';
+    input.classList.add('shake');
+    
+    setTimeout(() => {
+      input.classList.remove('shake');
+    }, 500);
+  }
+};
+
+// Also make sure to update the display whenever username changes
+window.updateUserDisplay = function() {
+  initUserHeaderDisplay();
+};
+
+
+// Also make sure to update the display whenever username changes
+window.updateUserDisplay = function() {
+  initUserHeaderDisplay();
+};
+// Add Ticket Modal Functions
+function showAddTicketModal() {
+  // Clear previous input values
+  document.getElementById('ticketNameInput').value = '';
+  if (window.quill) { quill.setContents([]); }
+  
+  // Show the modal
+  document.getElementById('addTicketModalCustom').style.display = 'flex';
+  
+  // Focus on the name input
+  setTimeout(() => {
+    document.getElementById('ticketNameInput').focus();
+  }, 100);
+}
+
+function handleAddTicketSubmit() {
+  const ticketName = document.getElementById('ticketNameInput').value.trim();
+  const ticketDescription = window.quill ? window.quill.root.innerHTML.trim() : '';
+
+  // Validate input
+  if (!ticketName) {
+    const nameInput = document.getElementById('ticketNameInput');
+    nameInput.classList.add('shake');
+    nameInput.style.borderColor = '#ff4d4f';
+    setTimeout(() => {
+      nameInput.classList.remove('shake');
+    }, 500);
+    return;
+  }
+
+  // Prepare ticket text (combine name and description if provided)
+  let ticketText = ticketName;
+  if (ticketDescription) {
+    ticketText = ticketName + ': ' + ticketDescription;
+  }
+
+  // Check if we're editing or adding
+  const isEditing = !!window.editingTicketData;
+
+  if (isEditing) {
+    // Clean: Build update object ONCE, use all fields!
+    const ticketData = {
+      id: window.editingTicketData.id,
+      text: ticketText,
+      isEdit: true,
+      idDisplay: ticketName,
+      descriptionDisplay: ticketDescription
+    };
+    console.log('[EDIT] Updating ticket:', ticketData);
+
+    if (window.updateTicketFromModal) {
+      window.updateTicketFromModal(ticketData);
+    } else {
+      // Fallback: Update locally and emit to server
+      updateTicketInUI(ticketData);
+      if (window.socket) {
+        window.socket.emit('updateTicket', ticketData);
+      }
+    }
+    // Reset state and close modal
+    hideAddTicketModal();
+    resetAddTicketModal();
+    window.editingTicketData = null;
+  } else {
+    // New ticket
+    const ticketData = {
+      id: `story_${Date.now()}`,
+      text: ticketText,
+      idDisplay: ticketName,
+      descriptionDisplay: ticketDescription
+    };
+    hideAddTicketModal();
+    if (window.addTicketFromModal) {
+      window.addTicketFromModal(ticketData);
+    } else {
+      // Fallback
+      const storyList = document.getElementById('storyList');
+      if (storyList) {
+        const storyCard = document.createElement('div');
+        storyCard.className = 'story-card';
+        storyCard.id = ticketData.id;
+        const storyTitle = document.createElement('div');
+        storyTitle.className = 'story-title';
+        storyTitle.textContent = ticketData.text;
+        storyCard.appendChild(storyTitle);
+        storyList.appendChild(storyCard);
+        if (window.socket) {
+          window.socket.emit('addTicket', ticketData);
+        }
+      }
+    }
+  }
+}
+  
+
+
+function hideAddTicketModal() {
+  document.getElementById('addTicketModalCustom').style.display = 'none';
+}
+
+function resetAddTicketModal() {
+  // Clear form inputs
+  document.getElementById('ticketNameInput').value = '';
+  if (window.quill) { quill.setContents([]); }
+  
+  // Reset modal title and button text
+  const modalTitle = document.querySelector('#addTicketModalCustom h3');
+  const confirmButton = document.getElementById('confirmAddTicket');
+  
+  if (modalTitle) modalTitle.textContent = 'Add New Ticket';
+  if (confirmButton) {
+    confirmButton.innerHTML = '<span class="plus-icon">+</span> ADD';
+  }
+  
+  // Clear editing state
+  window.editingTicketData = null;
+}
+
+     
+
+// Set up event listeners for the add ticket modal
+document.addEventListener('DOMContentLoaded', function() {
+  // Set up Add Ticket button to use modal
+  const addTicketBtn = document.getElementById('addTicketBtn');
+  if (addTicketBtn) {
+    // Remove any existing click handlers by cloning the button
+    const newBtn = addTicketBtn.cloneNode(true);
+    addTicketBtn.parentNode.replaceChild(newBtn, addTicketBtn);
+    
+    // Add new click handler for the modal
+    newBtn.addEventListener('click', showAddTicketModal);
+  }
+  
+  // Set up modal buttons
+  document.getElementById('cancelAddTicket').addEventListener('click', function() {
+  hideAddTicketModal();
+  resetAddTicketModal();
+});
+  document.getElementById('confirmAddTicket').addEventListener('click', handleAddTicketSubmit);
+  
+  // Set up enter key in description field
+  
+});
+
+// Expose function for main.js
+window.showAddTicketModal = showAddTicketModal;
+function isGuestUser() {
+  // Primary check: sessionStorage
+  const isHostFromStorage = sessionStorage.getItem('isHost');
+  if (isHostFromStorage !== null) {
+    return isHostFromStorage === 'false';
+  }
+  
+  // Secondary check: URL has roomId but user didn't create room
+  const urlParams = new URLSearchParams(window.location.search);
+  const hasRoomId = urlParams.has('roomId');
+  const isRoomCreator = sessionStorage.getItem('isRoomCreator') === 'true';
+  
+  return hasRoomId && !isRoomCreator;
+}
+
+    function setupGuestModeOnLoad() {
+      if (isGuestUser()) {
+        console.log('Guest mode activated - hiding control elements');
+        
+        // Hide control buttons in sidebar
+        const revealVotesBtn = document.getElementById('revealVotesBtn');
+        const resetVotesBtn = document.getElementById('resetVotesBtn');
+        if (revealVotesBtn) revealVotesBtn.classList.add('hide-for-guests');
+        if (resetVotesBtn) resetVotesBtn.classList.add('hide-for-guests');
+                // Hide upload ticket button
+        const fileInputContainer = document.getElementById('fileInputContainer');
+        if (fileInputContainer) fileInputContainer.classList.add('hide-for-guests');
+        
+        // Hide add ticket button 
+        const addTicketBtn = document.getElementById('addTicketBtn');
+        if (addTicketBtn) addTicketBtn.classList.add('hide-for-guests');
+        
+ 
+      }
+    }
+
+    // Custom modal functions
+    function showInviteModalCustom() {
+      // First hide any existing modals from the original app
+      hideAllOriginalModals();
+          // Create a guest URL
+      const currentUrl = new URL(window.location.href);
+      const params = new URLSearchParams(currentUrl.search);
+      const roomId = params.get('roomId');
+      // Create clean guest URL (without host parameter)
+      const guestUrl = `${currentUrl.origin}${currentUrl.pathname}?roomId=${roomId}`;
+      // Set the link value
+      //document.getElementById('inviteLinkCustom').value = window.location.href;
+      document.getElementById('inviteLinkCustom').value = guestUrl;
+      
+    // Show our custom modal
+  const modalElement = document.getElementById('inviteModalCustom');
+  if (modalElement) {
+    modalElement.style.display = 'flex';
+  } else {
+    console.error('Modal element not found!');
+    // Fallback to alert if modal element is missing
+    alert(`Share this invite link: ${guestUrl}`);
+  }
+}
+
+    function hideInviteModalCustom() {
+      document.getElementById('inviteModalCustom').style.display = 'none';
+    }
+
+    function copyInviteLinkCustom() {
+      const inviteInput = document.getElementById('inviteLinkCustom');
+      inviteInput.select();
+      document.execCommand('copy');
+      hideInviteModalCustom();
+     // alert('Invite link copied!');
+    }
+    
+    // Simple function to reveal votes - only toggles the body class
+    function revealVotes() {
+      document.body.classList.add('votes-revealed');
+    }
+
+    // Debugging function to help see what votes are stored
+    function debugVotes() {
+      console.clear();
+      console.log("DEBUG: Checking all story cards for votes");
+      
+      const storyList = document.getElementById('storyList');
+      const storyCards = Array.from(storyList?.querySelectorAll('.story-card') || []);
+      
+      console.log(`Found ${storyCards.length} story cards`);
+      
+      let totalVotes = 0;
+      
+      storyCards.forEach((card, index) => {
+        console.group(`Story ${index + 1}: ${card.id}`);
+        
+        // Check data-vote attribute
+        if (card.hasAttribute('data-vote')) {
+          console.log(`✅ data-vote attribute: "${card.getAttribute('data-vote')}"`);
+          totalVotes++;
+        } else {
+          console.log("❌ No data-vote attribute");
+        }
+        
+        // Check data-voted attribute
+        if (card.hasAttribute('data-voted')) {
+          console.log(`✅ data-voted attribute: "${card.getAttribute('data-voted')}"`);
+        } else {
+          console.log("❌ No data-voted attribute");
+        }
+        
+        // Check vote-badge elements
+        const voteBadges = card.querySelectorAll('.vote-badge');
+        if (voteBadges.length > 0) {
+          console.log(`✅ Found ${voteBadges.length} vote badge(s):`);
+          voteBadges.forEach((badge, i) => {
+            console.log(`   Badge ${i + 1}: "${badge.textContent}" (${badge.hidden ? 'hidden' : 'visible'})`);
+          });
+        } else {
+          console.log("❌ No vote-badge elements");
+        }
+        
+        console.groupEnd();
+      });
+      
+      console.log(`Summary: Found ${totalVotes} stories with votes out of ${storyCards.length} total stories`);
+      
+      // Check if any planning cards are marked as selected
+      const selectedCards = document.querySelectorAll('.card[data-selected="true"]');
+      console.log(`Found ${selectedCards.length} selected planning cards`);
+      selectedCards.forEach(card => {
+        console.log(`   Value: ${card.getAttribute('data-value')}`);
+      });
+    }
+
+    // IMPROVED: Export function that retrieves ONLY actual votes
+    function exportAllVotes() {
+      try {
+        console.log("Export function started - retrieving actual votes only");
+        
+        // Force vote visibility for export
+        document.body.classList.add('votes-revealed');
+        
+        // Get all story cards
+        const storyList = document.getElementById('storyList');
+        const storyCards = Array.from(storyList?.querySelectorAll('.story-card') || []);
+        
+        if (storyCards.length === 0) {
+          alert('No stories available to export.');
+          return;
+        }
+        
+        console.log(`Found ${storyCards.length} story cards`);
+        
+        // Save current selection to restore later
+        const originalSelectedStory = document.querySelector('.story-card.selected');
+        
+        // Prepare CSV content
+        let csv = `Story ID,Story Description,Highest Vote\n`;
+        
+        // First, gather all existing votes
+        console.log("Gathering all votes from story cards");
+        
+        // Process each story card
+        storyCards.forEach((card, index) => {
+          // Get story ID
+          const storyId = card.id || `story_${index}`;
+          
+          // Get story description
+          let storyDesc = '';
+          const storyTitleElement = card.querySelector('.story-title');
+          if (storyTitleElement) {
+            storyDesc = storyTitleElement.textContent.trim();
+          } else {
+            storyDesc = card.textContent.trim();
+          }
+          
+          // FOCUS: Find the actual vote for this story
+          let highestVote = 'No votes';
+          
+          // Check data-vote attribute (primary storage method)
+          if (card.hasAttribute('data-vote')) {
+            const voteValue = card.getAttribute('data-vote');
+            if (voteValue && !isNaN(voteValue)) {
+              highestVote = voteValue;
+              console.log(`Story ${storyId} has vote ${voteValue} from data-vote attribute`);
+            }
+          }
+          
+          // Check for vote-badge elements (secondary storage method)
+          if (highestVote === 'No votes') {
+            const voteBadges = card.querySelectorAll('.vote-badge');
+            voteBadges.forEach(badge => {
+              const voteText = badge.textContent.trim();
+              if (voteText && !isNaN(voteText)) {
+                highestVote = voteText;
+                console.log(`Story ${storyId} has vote ${voteText} from vote-badge element`);
+              }
+            });
+          }
+          
+          // Check data-voted attribute as indicator (tertiary check)
+          if (highestVote === 'No votes' && card.hasAttribute('data-voted')) {
+            // Story is marked as voted but no value found
+            console.log(`Story ${storyId} is marked as voted but no value found`);
+          }
+          
+          // Properly escape the description for CSV format
+          const escapedDesc = storyDesc.includes('"') || storyDesc.includes(',') ? 
+                             `"${storyDesc.replace(/"/g, '""')}"` : storyDesc;
+          
+          // Add this row to the CSV
+          csv += `${storyId},${escapedDesc},${highestVote}\n`;
+        });
+        
+        // Restore original selection
+        if (originalSelectedStory) {
+          document.querySelectorAll('.story-card').forEach(s => s.classList.remove('selected'));
+          originalSelectedStory.classList.add('selected');
+        }
+        
+        // Create and trigger the download
+        console.log("Creating CSV file for download");
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'planning_poker_votes.csv');
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        
+        // Clean up
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        console.log("Export completed with actual votes only");
+        
+      } catch (error) {
+        console.error('Error exporting votes:', error);
+        alert('Error exporting votes: ' + (error.message || 'Unknown error'));
+      }
+    }
+
+     document.addEventListener('DOMContentLoaded', function() {
+  const oldCsvInput = document.getElementById('csvInput');
+  if (oldCsvInput) {
+    oldCsvInput.style.display = 'none';
+    oldCsvInput.disabled = true;
+    console.log('[CSV] Old CSV input disabled - using new modal system');
+  }
+});
+    
+    // Story selection functionality
+    document.addEventListener('click', function(e) {
+      const clickedStory = e.target.closest('.story-card');
+      if (clickedStory) {
+        // Deselect all stories
+        document.querySelectorAll('.story-card').forEach(story => {
+          story.classList.remove('selected');
+        });
+        
+        // Select the clicked story
+        clickedStory.classList.add('selected');
+      }
+    });
+    
+    // Previous and Next story button handlers
+    document.getElementById('prevStory')?.addEventListener('click', function() {
+      const selectedStory = document.querySelector('.story-card.selected');
+      if (selectedStory && selectedStory.previousElementSibling) {
+        selectedStory.classList.remove('selected');
+        selectedStory.previousElementSibling.classList.add('selected');
+      }
+    });
+    
+    document.getElementById('nextStory')?.addEventListener('click', function() {
+      const selectedStory = document.querySelector('.story-card.selected');
+      if (selectedStory && selectedStory.nextElementSibling) {
+        selectedStory.classList.remove('selected');
+        selectedStory.nextElementSibling.classList.add('selected');
+      }
+    });
+   
+
+    // Add click handlers for planning cards - to store votes in data attributes
+    document.querySelectorAll('.card').forEach(card => {
+      card.addEventListener('click', function() {
+        const value = this.getAttribute('data-value');
+        const selectedStory = document.querySelector('.story-card.selected');
+        
+        if (selectedStory) {
+          // Store the vote directly on the story card as a data attribute
+          selectedStory.setAttribute('data-vote', value);
+          selectedStory.setAttribute('data-voted', 'true');
+          
+          // Store which card was selected
+          document.querySelectorAll('.card').forEach(c => {
+            c.removeAttribute('data-selected');
+          });
+          this.setAttribute('data-selected', 'true');
+          
+          // Update any vote badge if it exists
+          let voteBadge = selectedStory.querySelector('.vote-badge');
+          if (!voteBadge) {
+            voteBadge = document.createElement('span');
+            voteBadge.className = 'vote-badge';
+            selectedStory.appendChild(voteBadge);
+          }
+          voteBadge.textContent = value;
+        }
+      });
+    });
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check for stories
+      checkForStories();
+      
+      // Setup reveal button click handler
+      const revealBtn = document.getElementById('revealVotesBtn');
+      if (revealBtn) {
+        revealBtn.addEventListener('click', revealVotes);
+      }
+      
+      // Setup export button with direct onclick handler
+      const exportBtn = document.getElementById('exportCsvBtn');
+      if (exportBtn) {
+        exportBtn.onclick = exportAllVotes;
+      }
+      
+      // Setup invite button with direct handler to ensure it uses our custom modal
+      const inviteBtn = document.getElementById('inviteButton');
+      if (inviteBtn) {
+        // Remove any existing handlers first by cloning and replacing
+        const newInviteBtn = inviteBtn.cloneNode(true);
+        inviteBtn.parentNode.replaceChild(newInviteBtn, inviteBtn);
+        
+        // Add our custom handler
+        newInviteBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          showInviteModalCustom();
+        });
+      }
+      
+      // Setup NEW SESSION button to include host parameter
+      const newSessionBtn = document.getElementById('newSessionBtn');
+      if (newSessionBtn) {
+        newSessionBtn.addEventListener('click', function() {
+          const roomId = 'room-' + Math.floor(Math.random() * 10000);
+          window.location.href = `${window.location.origin}${window.location.pathname}?roomId=${roomId}&host=true`;
+        });
+      }
+      
+      // Setup guest mode restrictions
+      setupGuestModeOnLoad();
+      
+      // Hide original modals
+      hideAllOriginalModals();
+    });
+    
+    // Watch for story list changes
+    const storyList = document.getElementById('storyList');
+    if (storyList) {
+      const observer = new MutationObserver(function(mutations) {
+        checkForStories();
+      });
+      
+      observer.observe(storyList, { 
+        childList: true,
+        subtree: true
+      });
+    }
+    
+    // Override existing invite functions if they exist
+    if (typeof openInviteModal === 'function') {
+      console.log('Overriding existing openInviteModal function');
+      window.openInviteModal = function() {
+        showInviteModalCustom();
+        return false;
+      };
+    }
+
+window.editStory = function(ticketData) {
+  let ticketName = ticketData.idDisplay !== undefined ? ticketData.idDisplay : '';
+  let ticketDescription = ticketData.descriptionDisplay !== undefined ? ticketData.descriptionDisplay : '';
+
+  // Fallback for legacy tickets
+  if (!ticketName && ticketData.text) {
+    if (ticketData.text.includes(': ')) {
+      const parts = ticketData.text.split(': ', 2);
+      ticketName = parts[0];
+      ticketDescription = parts[1];
+    } else {
+      ticketName = ticketData.text;
+    }
+  }
+
+  // Set the ticket name
+  document.getElementById('ticketNameInput').value = ticketName;
+  
+  // **FIX: Handle HTML content properly in Quill editor**
+  if (window.quill) {
+    if (ticketDescription) {
+      // If it's HTML, set it as HTML; if it's plain text, convert to HTML
+      if (ticketDescription.includes('<') && ticketDescription.includes('>')) {
+        // It's HTML content
+        window.quill.root.innerHTML = ticketDescription;
+      } else {
+        // It's plain text, set as text
+        window.quill.setText(ticketDescription);
+      }
+    } else {
+      // Clear the editor
+      window.quill.setText('');
+    }
+  }
+
+  // Show modal and set editing state
+  document.getElementById('addTicketModalCustom').style.display = 'flex';
+  setTimeout(() => {
+    document.getElementById('ticketNameInput').focus();
+  }, 100);
+
+  window.editingTicketData = ticketData;
+  const modalTitle = document.querySelector('#addTicketModalCustom h3');
+  const confirmButton = document.getElementById('confirmAddTicket');
+
+  if (modalTitle) modalTitle.textContent = 'Edit Ticket';
+  if (confirmButton) confirmButton.innerHTML = '<span class="plus-icon">✓</span> UPDATE';
+};
+
+     
+  
+  </script>
+
+   <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if the button exists before trying to use it
+            const logOffBtn = document.getElementById('logOffBtn');
+            
+            if (logOffBtn) {
+                logOffBtn.addEventListener('click', function() {
+                    // Clear session storage
+                    sessionStorage.clear();
+                    
+                    // Redirect to main.html
+                    window.location.href = 'About.html';
+                });
+            } else {
+                console.error('Log Off button not found - make sure the button exists in HTML');
+            }
+        });
+    </script>
+   <!-- ENHANCED SCRIPT FOR USERNAME HANDLING -->
+  <script src="/socket.io/socket.io.js"></script>  
+<script type="module" src="socket.js"></script>
+<script type="module" src="main.js"></script>
+
+<script>
+  // Global flag to track if username is ready
+  window.userNameReady = false;
+  // Handle username synchronization and prompt for invited users
+document.addEventListener('DOMContentLoaded', function() {
+  // STEP 1: Check for username from main.html (userName with capital N)
+  const storedUserName = sessionStorage.getItem('userName');
+  
+  // STEP 2: Check if this is a new user joining via invite link
+  const urlParams = new URLSearchParams(window.location.search);
+  const isJoiningViaInvite = urlParams.has('roomId') && !storedUserName;
+  
+  if (isJoiningViaInvite) {
+    // This is someone joining via invite link who doesn't have a userName yet
+    // ✅ Mark them as guest since they're joining via invite
+    sessionStorage.setItem('isHost', 'false');
+    sessionStorage.setItem('isRoomCreator', 'false');
+    
+    showLoginModal();
+    
+    // Important: Mark username as not ready to prevent socket connection
+    window.userNameReady = false;
+    
+    // Hide main content until user provides name
+    hideMainContent();
+  } else {
+    // User already has a name, mark as ready
+    window.userNameReady = true;
+    
+    // ✅ If no host status is set, check if they have room creator status
+    if (!sessionStorage.getItem('isHost')) {
+      const isCreator = sessionStorage.getItem('isRoomCreator') === 'true';
+      sessionStorage.setItem('isHost', isCreator ? 'true' : 'false');
+    }
+    
+    // ✅ Update header if we have username
+    if (storedUserName) {
+      setTimeout(initUserHeaderDisplay, 100);
+    }
+  }
+  
+  // Debugging info
+  console.log('Username from sessionStorage:', sessionStorage.getItem('userName'));
+  console.log('Host status:', sessionStorage.getItem('isHost'));
+  console.log('Room creator:', sessionStorage.getItem('isRoomCreator'));
+});
+
+  // Function to hide main content until user provides name
+  function hideMainContent() {
+    const container = document.querySelector('.container');
+    const uploadSection = document.querySelector('.upload-section');
+    
+    if (container) container.style.display = 'none';
+    if (uploadSection) uploadSection.style.display = 'none';
+  }
+  
+  // Function to show main content after user provides name
+  function showMainContent() {
+    const container = document.querySelector('.container');
+    const uploadSection = document.querySelector('.upload-section');
+    
+    if (container) container.style.display = 'flex';
+    if (uploadSection) uploadSection.style.display = 'flex';
+  }
+  
+  // Function to show custom login modal
+  function showLoginModal() {
+    const loginModal = document.getElementById('loginModalCustom');
+    if (loginModal) {
+      // Mark username as explicitly not ready to prevent socket connection
+        window.userNameReady = false;  
+        loginModal.style.display = 'flex';
+      
+      // Focus on the input field
+      setTimeout(() => {
+        document.getElementById('userNameInput').focus();
+      }, 100);
+      
+      // Add event listener to join button
+      document.getElementById('joinSessionWithName').addEventListener('click', handleLoginSubmit);
+      
+      // Add event listener for enter key
+      document.getElementById('userNameInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          handleLoginSubmit();
+        }
+      });
+    } else {
+      // Fallback to prompt if modal doesn't exist
+      fallbackToPrompt();
+    }
+  }
+  
+  // Function to handle login form submission
+// Function to handle login form submission
+function handleLoginSubmit() {
+  const username = document.getElementById('userNameInput').value.trim();
+  
+  if (username) {
+    // Store with both key formats for compatibility
+    sessionStorage.setItem('userName', username);
+    
+    // ✅ Ensure guest status is maintained for invited users
+    if (!sessionStorage.getItem('isHost')) {
+      sessionStorage.setItem('isHost', 'false');
+      sessionStorage.setItem('isRoomCreator', 'false');
+    }
+    
+    console.log(`User joined as: ${username}`);
+    
+    // Hide the modal
+    document.getElementById('loginModalCustom').style.display = 'none';
+    
+    // Mark username as ready
+    window.userNameReady = true;
+    
+    // Show main content
+    showMainContent();
+    
+    // Initialize the app now that we have a username
+    initializeAppWithName(username);
+  } else {
+    // Show validation error - shake the input
+    const input = document.getElementById('userNameInput');
+    input.style.borderColor = '#ff4d4f';
+    input.classList.add('shake');
+    
+    setTimeout(() => {
+      input.classList.remove('shake');
+    }, 500);
+  }
+}
+
+  // Initialize the app with the provided username
+  function initializeAppWithName(username) {
+    // Initialize socket connection with the username
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomId = urlParams.get('roomId');
+    
+    if (window.initializeSocketWithName) {
+      window.initializeSocketWithName(roomId, username);
+    } else {
+      // Fallback to reloading if the function isn't available
+      window.location.reload();
+    }
+  }
+  
+  // Fallback to browser prompt if modal doesn't exist
+  function fallbackToPrompt() {
+    const username = prompt('Please enter your name to join the planning poker session:');
+    
+    if (username && username.trim()) {
+      // Store with both key formats for compatibility
+      sessionStorage.setItem('userName', username.trim());
+      console.log(`User joined as: ${username.trim()}`);
+      
+      // Mark username as ready
+      window.userNameReady = true;
+      
+      // Show main content and initialize
+      showMainContent();
+      initializeAppWithName(username.trim());
+    } else {
+      // If no username provided, set a default
+      const guestName = 'Guest ' + Math.floor(Math.random() * 1000);
+      sessionStorage.setItem('userName', guestName);
+      alert(`You will join as "${guestName}"`);
+      
+      // Mark username as ready
+      window.userNameReady = true;
+      
+      // Show main content and initialize
+      showMainContent();
+      initializeAppWithName(guestName);
+    }
+  }
+  
+  // Make getUserName function available globally for socket.js
+  window.getUserName = function() {
+    return sessionStorage.getItem('userName') || 'Anonymous';
+  };
+  
+  // Add a little shake animation for validation errors
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    .shake {
+      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+  `;
+  document.head.appendChild(style);
+</script> 
+    
+    <script>
+  // Expose modal functions to window scope for main.js to use
+  window.showInviteModalCustom = function() {
+    // First hide any existing modals from the original app
+    if (typeof hideAllOriginalModals === 'function') {
+      hideAllOriginalModals();
+    }
+    
+    // Create a guest URL
+    const currentUrl = new URL(window.location.href);
+    const params = new URLSearchParams(currentUrl.search);
+    const roomId = params.get('roomId');
+    
+    // Create clean guest URL (without host parameter)
+    const guestUrl = `${currentUrl.origin}${currentUrl.pathname}?roomId=${roomId}`;
+    
+    // Set the link value
+    document.getElementById('inviteLinkCustom').value = guestUrl;
+    
+    // Show our custom modal
+    document.getElementById('inviteModalCustom').style.display = 'flex';
+  };
+  
+  window.hideInviteModalCustom = function() {
+    document.getElementById('inviteModalCustom').style.display = 'none';
+  };
+  
+  window.copyInviteLinkCustom = function() {
+    const inviteInput = document.getElementById('inviteLinkCustom');
+    inviteInput.select();
+    document.execCommand('copy');
+        hideInviteModalCustom();
+ //   alert('Invite link copied!');
+  };
+  
+  // Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const logOffBtn = document.getElementById('logOffBtn');
+    
+    if (logOffBtn) {
+        logOffBtn.addEventListener('click', function() {
+            // Clear session storage
+            sessionStorage.clear();
+            
+            // Reset header to default
+            const usernameEl = document.getElementById('headerUsername');
+            const avatarEl = document.getElementById('headerUserAvatar');
+            if (usernameEl) usernameEl.textContent = 'User';
+            if (avatarEl) avatarEl.innerHTML = '';
+            
+            // Redirect to main.html
+            window.location.href = 'About.html';
+        });
+    }
+});
+
+</script>
+ <!-- Add this before the closing 
+<div id="exportCsvModal">
+  <div class="modal-content">
+    <h3>Export Stories to CSV</h3>
+    
+    <div class="field-mapping">
+      <div>
+        <label for="csvStoryId">Story ID:</label>
+        <select id="csvStoryId"></select>
+      </div>
+      <div>
+        <label for="csvTitle">Title/Description:</label>
+        <select id="csvTitle"></select>
+      </div>
+      <div>
+        <label for="csvPoints">Story Points:</label>
+        <select id="csvPoints"></select>
+      </div>
+      <div>
+        <label for="csvVotes">Vote Count:</label>
+        <select id="csvVotes"></select>
+      </div>
+      <div>
+        <label for="csvAverage">Average Vote:</label>
+        <select id="csvAverage"></select>
+      </div>
+    </div>
+    
+    <div class="export-options">
+      <label><input type="checkbox" id="csvHeaderRow" checked> Include header row</label>
+      <label><input type="checkbox" id="csvOnlyRevealed"> Only export stories with revealed votes</label>
+      <label><input type="checkbox" id="csvDetailedVotes"> Include detailed vote information</label>
+    </div>
+    
+    <div class="csv-preview" id="csvPreview">Preview will appear here...</div>
+    
+    <div class="button-group">
+      <button class="cancel-btn">Cancel</button>
+      <button class="confirm-btn">Export CSV</button>
+    </div>
+  </div>
+</div>
+
+     <div id="hostModeErrorModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <p class="modal-message">Host already available</p>
+    <button onclick="document.getElementById('hostModeErrorModal').style.display='none'">OK</button>
+  </div>
+</div>
+
+</body> tag 
+<script src="userlist-fix.js"></script> -->
+<script>
+  // Force user list fix on page interaction
+  document.addEventListener('click', function() {
+    if (typeof directUserFix === 'function') {
+      directUserFix();
+    }
+  }, { once: true });
+</script>
+   <script>
+  // Helper function to hide all original modals
+  function hideAllOriginalModals() {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+      modal.style.display = 'none';
+    });
+  }
+
+  // Mobile-specific card functions
+  window.fixRevealedVoteFontSizes = function() {
+    const voteCards = document.querySelectorAll('.vote-card-space.has-vote .vote-badge');
+    const isMobile = window.innerWidth <= 768;
+    
+    voteCards.forEach(badge => {
+      const text = badge.textContent || '';
+      let fontSize = isMobile ? '14px' : '18px'; // Smaller base size on mobile
+      
+      if (text.length >= 2) {
+        fontSize = isMobile ? '12px' : '16px';
+      }
+      
+      if (text.includes('XX')) {
+        fontSize = isMobile ? '10px' : '14px';
+      }
+      
+      badge.style.fontSize = fontSize;
+      badge.style.maxWidth = '80%';
+      badge.style.textAlign = 'center';
+      badge.style.lineHeight = '1';
+      badge.style.overflow = 'hidden';
+    });
+  };
+  
+  // Make emitVote function available for mobile use
+  window.emitVote = function(vote, targetUserId) {
+    if (window.socket) {
+      window.socket.emit('castVote', { vote, targetUserId });
+      
+      // Show selection feedback
+      const cards = document.querySelectorAll('#planningCards .card');
+      cards.forEach(card => {
+        card.classList.remove('selected-card');
+        if (card.getAttribute('data-value') === vote) {
+          card.classList.add('selected-card');
+        }
+      });
+    }
+  };
+        
+document.addEventListener('DOMContentLoaded', function() {
+  // Only run on mobile/tablet devices
+  if (window.innerWidth <= 1024) {
+    applyExactMobileLayout();
+  }
+  
+  // Also apply when window is resized
+  window.addEventListener('resize', function() {
+    if (window.innerWidth <= 1024) {
+      applyExactMobileLayout();
+    }
+  });
+  
+  function applyExactMobileLayout() {
+    console.log("Applying exact mobile layout from reference image");
+    
+    // Create style element for the exact mobile layout
+    const mobileStyle = document.createElement('style');
+    mobileStyle.id = 'exact-mobile-layout';
+    mobileStyle.textContent = `
+      /* Reset container layout */
+      .container {
+        display: block !important;
+        padding-bottom: 100px !important;
+        background: white !important;
+      }
+      
+      /* Header styling */
+      header {
+        padding: 12px 20px !important;
+        border-bottom: 1px solid #f0f0f0 !important;
+      }
+      
+      /* Hide sidebar on mobile and show as a collapsible section */
+      .sidebar {
+        width: 100% !important;
+        padding: 15px 20px !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      
+      /* Hide redundant elements */
+      .upload-section, .planning-cards-section h3 {
+        display: none !important;
+      }
+      
+      /* Main content area */
+      .main {
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        order: 2 !important;
+      }
+      
+      /* Right sidebar styling */
+      .rightbar {
+        width: 320px !important;
+        padding: 15px 20px !important;
+        border: none !important;
+        max-height: 300px !important;
+        overflow-y: auto !important;
+      }
+      
+      /* Story cards */
+      .story-card {
+        margin-bottom: 8px !important;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+        padding: 12px !important;
+      }
+      
+      /* Avatar styling */
+      #userCircle {
+        padding: 15px 5px !important;
+        margin-bottom: 60px !important;
+      }
+      
+      .avatar-circle {
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 24px !important;
+        background-color: #f5ba55 !important;
+        color: white !important;
+        border: none !important;
+      }
+      
+      /* Vote card space */
+      .vote-card-space {
+        width: 60px !important;
+        height: 80px !important;
+        border: 2px dashed #ccc !important;
+        background-color: white !important;
+        border-radius: 8px !important;
+      }
+      
+      /* Reveal votes button */
+      .reveal-votes-button {
+        background-color: white !important;
+        color: #673ab7 !important;
+        border: 2px solid #673ab7 !important;
+        text-transform: uppercase !important;
+        font-weight: bold !important;
+        border-radius: 30px !important;
+        padding: 10px 20px !important;
+      }
+      
+      /* Fixed card panel at bottom */
+      .card-panel {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        background: white !important;
+        border-top: 1px solid #e0e0e0 !important;
+        padding: 10px 5px !important;
+        box-shadow: 0 -2px 5px rgba(0,0,0,0.1) !important;
+        display: flex !important;
+        justify-content: center !important;
+        z-index: 1000 !important;
+      }
+      
+      /* Planning cards styling to match design */
+      .cards {
+        display: flex !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        padding: 8px 0 !important;
+      }
+      
+      .card {
+        width: 50px !important;
+        height: 50px !important;
+        background-color: #e1d4f9 !important;
+        color: #333 !important;
+        font-weight: bold !important;
+        font-size: 16px !important;
+        border-radius: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 0 !important;
+      }
+      
+      /* Add exact colors from reference */
+      .button, #revealVotesBtn, #resetVotesBtn {
+        color: #673ab7 !important;
+        border-color: #673ab7 !important;
+        border-radius: 30px !important;
+      }
+      
+      /* Make invite and upload buttons match design */
+      .invite-button, .file-button {
+        border-radius: 30px !important;
+        min-width: 120px !important;
+      }
+      
+      /* Exact alignment for navigation buttons */
+      .navigation-buttons {
+        display: flex !important;
+        justify-content: space-between !important;
+        padding: 0 10px !important;
+        margin: 15px 0 !important;
+      }
+      
+      /* Enhance add ticket button */
+      .add-ticket-btn {
+        border-radius: 30px !important;
+        color: #673ab7 !important;
+        border-color: #673ab7 !important;
+        font-weight: bold !important;
+        margin-bottom: 15px !important;
+      }
+    `;
+    document.head.appendChild(mobileStyle);
+    
+    // Move the planning cards to the bottom in a fixed panel
+    const planningCards = document.querySelector('#planningCards');
+    if (planningCards && !document.querySelector('.mobile-card-panel')) {
+      const cardPanel = document.createElement('div');
+      cardPanel.className = 'card-panel mobile-card-panel';
+      
+      // Add PLANNING CARDS heading above the cards
+      const cardsHeading = document.createElement('div');
+      cardsHeading.textContent = 'PLANNING CARDS';
+      cardsHeading.style.cssText = 'color:#673ab7; font-size:14px; font-weight:600; margin-bottom:5px; text-align:center; width:100%; text-transform:uppercase;';
+      
+      // Move cards to the panel
+      cardPanel.appendChild(cardsHeading);
+      cardPanel.appendChild(planningCards);
+      document.body.appendChild(cardPanel);
+    }
+    
+    // Add Upload Ticket and Invite Others buttons at the top
+    const header = document.querySelector('header');
+    if (header && !document.querySelector('.mobile-action-buttons')) {
+      const actionButtons = document.createElement('div');
+      actionButtons.className = 'mobile-action-buttons';
+      actionButtons.style.cssText = 'display:flex; gap:10px; justify-content:flex-end; padding:10px 20px; border-bottom:1px solid #f0f0f0;';
+      
+      const uploadButton = document.createElement('button');
+      uploadButton.textContent = 'Upload Ticket';
+      uploadButton.className = 'invite-button';
+      uploadButton.onclick = function() {
+        document.getElementById('csvInput').click();
+      };
+      
+      const inviteButton = document.createElement('button');
+      inviteButton.textContent = 'Invite Others';
+      inviteButton.className = 'invite-button';
+      inviteButton.onclick = function() {
+        window.showInviteModalCustom();
+      };
+      
+      actionButtons.appendChild(uploadButton);
+      actionButtons.appendChild(inviteButton);
+      
+      header.insertAdjacentElement('afterend', actionButtons);
+    }
+    
+    // Enhance user voting area
+    setupMobileCardSelection();
+  }
+  
+  function setupMobileCardSelection() {
+    document.querySelectorAll('#planningCards .card').forEach(card => {
+      card.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        
+        // Get current user's vote space
+        const userName = sessionStorage.getItem('userName');
+        if (!userName) return;
+        
+        const safeId = userName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-_]/g, '');
+        const voteSpace = document.getElementById(`vote-space-${safeId}`);
+        
+        if (voteSpace) {
+          const vote = this.getAttribute('data-value');
+          
+          // Clear selections and add to this card
+          document.querySelectorAll('#planningCards .card').forEach(c => {
+            c.classList.remove('selected-card');
+          });
+          this.classList.add('selected-card');
+          
+          // Use the emitVote function if available
+          if (typeof window.emitVote === 'function') {
+            window.emitVote(vote, userName);
+          } else if (typeof window.socket !== 'undefined') {
+            window.socket.emit('castVote', { vote, targetUserId: userName });
+          }
+        }
+      });
+    });
+  }
+});
+  
+// Connection status indicator
+const statusIndicator = document.getElementById('connectionStatus');
+
+function updateConnectionStatus(status) {
+  if (!statusIndicator) return;
+  
+  switch(status) {
+    case 'connected':
+      statusIndicator.className = 'connection-status';
+      statusIndicator.title = 'Connected';
+      break;
+    case 'connecting':
+      statusIndicator.className = 'connection-status connecting';
+      statusIndicator.title = 'Connecting...';
+      break;
+    case 'disconnected':
+      statusIndicator.className = 'connection-status disconnected';
+      statusIndicator.title = 'Disconnected';
+      break;
+  }
+}
+
+// Update status when socket events occur
+document.addEventListener('DOMContentLoaded', function() {
+  if (window.socket) {
+    window.socket.on('connect', () => updateConnectionStatus('connected'));
+    window.socket.on('disconnect', () => updateConnectionStatus('disconnected'));
+    window.socket.on('connecting', () => updateConnectionStatus('connecting'));
+    window.socket.on('reconnecting', () => updateConnectionStatus('connecting'));
+  }
+});
+</script>
+<script>
+let csvData = [];
+let csvHeaders = [];
+let selectedCsvFile = null;
+let importInProgress = false;
+
+// Show CSV Upload Modal
+function showCsvUploadModal() {
+  document.getElementById('csvUploadModal').style.display = 'flex';
+  document.getElementById('csvUploadStep').classList.add('active');
+  document.getElementById('csvMappingStep').classList.remove('active');
+  
+  // Reset everything
+  selectedCsvFile = null;
+  csvData = [];
+  csvHeaders = [];
+  importInProgress = false;
+  document.getElementById('csvFileInput').value = '';
+}
+
+// Hide CSV Upload Modal
+function hideCsvUploadModal() {
+  document.getElementById('csvUploadModal').style.display = 'none';
+  document.getElementById('csvUploadStep').classList.add('active');
+  document.getElementById('csvMappingStep').classList.remove('active');
+  
+  // Reset everything
+  selectedCsvFile = null;
+  csvData = [];
+  csvHeaders = [];
+  importInProgress = false;
+  document.getElementById('csvFileInput').value = '';
+  document.getElementById('useFirstRowAsHeaders').checked = true;
+}
+
+// Trigger file input - Make this a simple global function
+function triggerCsvFileInput() {
+  console.log('triggerCsvFileInput called');
+  const fileInput = document.getElementById('csvFileInput');
+  if (fileInput) {
+    console.log('File input found, clicking...');
+    fileInput.click();
+  } else {
+    console.error('File input not found');
+  }
+}
+
+// Go back to upload step
+function goBackToCsvUpload() {
+  document.getElementById('csvUploadStep').classList.add('active');
+  document.getElementById('csvMappingStep').classList.remove('active');
+}
+
+// Setup - Run only once
+document.addEventListener('DOMContentLoaded', function() {
+  // Prevent multiple setups
+  if (window.csvSetupDone) return;
+  window.csvSetupDone = true;
+  
+  console.log('Setting up CSV upload handlers');
+  
+  const fileInput = document.getElementById('csvFileInput');
+  const importBtn = document.getElementById('importCsvBtn');
+  const uploadTicketMenuBtn = document.getElementById('uploadTicketMenuBtn');
+  
+  // Disable old CSV system completely
+  const oldCsvInput = document.getElementById('csvInput');
+  if (oldCsvInput) {
+    oldCsvInput.style.display = 'none';
+    oldCsvInput.disabled = true;
+  }
+  
+  // File input change handler
+  if (fileInput) {
+    fileInput.addEventListener('change', function(e) {
+      console.log('File input changed');
+      const file = e.target.files[0];
+      if (file && file.name.toLowerCase().endsWith('.csv')) {
+        selectedCsvFile = file;
+        console.log('Selected file:', file.name);
+        processCsvFile(file);
+      } else if (file) {
+        alert('Please select a valid CSV file.');
+      }
+    });
+  }
+  
+  // Import button handler
+  if (importBtn) {
+    importBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Import button clicked');
+      handleCsvImport();
+    });
+  }
+  
+  // Menu button handler
+  if (uploadTicketMenuBtn) {
+    uploadTicketMenuBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Upload ticket menu clicked');
+      showCsvUploadModal();
+    });
+  }
+});
+
+// Process CSV file
+function processCsvFile(file) {
+  if (!file) {
+    console.error('No file provided to processCsvFile');
+    return;
+  }
+  
+  console.log('Processing CSV file:', file.name);
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const csvText = e.target.result;
+      console.log('CSV text loaded, length:', csvText.length);
+      parseCsvContent(csvText);
+    } catch (error) {
+      console.error('Error processing CSV:', error);
+      alert('Error processing CSV file: ' + error.message);
+    }
+  };
+  
+  reader.onerror = function() {
+    console.error('FileReader error');
+    alert('Error reading file');
+  };
+  
+  reader.readAsText(file);
+}
+
+// Parse CSV content
+function parseCsvContent(csvText) {
+  if (!csvText || csvText.trim().length === 0) {
+    alert('The CSV file appears to be empty.');
+    return;
+  }
+  
+  const lines = csvText.trim().split(/\r?\n/).filter(line => line.trim());
+  const useHeaders = document.getElementById('useFirstRowAsHeaders').checked;
+  
+  console.log('Parsing CSV, lines found:', lines.length);
+  
+  // Simple CSV parsing
+  const parsedData = [];
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const row = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let j = 0; j < line.length; j++) {
+      const char = line[j];
+      
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        row.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    row.push(current.trim());
+    parsedData.push(row);
+  }
+  
+  if (useHeaders && parsedData.length > 0) {
+    csvHeaders = parsedData[0];
+    csvData = parsedData.slice(1);
+  } else {
+    csvHeaders = parsedData[0] ? parsedData[0].map((_, index) => `Column ${index + 1}`) : [];
+    csvData = parsedData;
+  }
+  
+  console.log('CSV parsed - Headers:', csvHeaders);
+  console.log('CSV parsed - Data rows:', csvData.length);
+  
+  if (csvData.length === 0) {
+    alert('No data rows found in CSV file.');
+    return;
+  }
+  
+  showMappingStep();
+}
+
+// Show mapping step
+// Show mapping step
+function showMappingStep() {
+  document.getElementById('csvUploadStep').classList.remove('active');
+  document.getElementById('csvMappingStep').classList.add('active');
+  
+  populateMappingDropdowns();
+  populatePreviewTable(); // Show initial preview
+  
+  // Update preview when mappings change
+  const selects = document.querySelectorAll('.csv-mapping-select');
+  selects.forEach(select => {
+    select.addEventListener('change', populatePreviewTable);
+  });
+}
+
+// Populate mapping dropdowns
+function populateMappingDropdowns() {
+  const mappingSelects = ['summaryMapping', 'keyMapping', 'descriptionMapping', 'linkMapping', 'estimateMapping'];
+  
+  mappingSelects.forEach(selectId => {
+    const select = document.getElementById(selectId);
+    if (select) {
+      select.innerHTML = '<option value="">Select...</option>';
+      
+      csvHeaders.forEach((header, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = header;
+        select.appendChild(option);
+      });
+    }
+  });
+  
+  autoMapFields();
+}
+
+// Auto-map common fields
+function autoMapFields() {
+  const mappings = {
+    'summaryMapping': ['summary', 'title', 'subject', 'description', 'issue', 'story', 'name'],
+    'keyMapping': ['key', 'id', 'number', 'ticket', 'issue_id'],
+    'descriptionMapping': ['description', 'detail', 'details', 'body', 'content'],
+    'linkMapping': ['link', 'url', 'href'],
+    'estimateMapping': ['estimate', 'points', 'story_points', 'effort', 'size']
+  };
+  
+  Object.keys(mappings).forEach(selectId => {
+    const select = document.getElementById(selectId);
+    if (select) {
+      const keywords = mappings[selectId];
+      
+      for (let i = 0; i < csvHeaders.length; i++) {
+        const header = csvHeaders[i].toLowerCase();
+        if (keywords.some(keyword => header.includes(keyword))) {
+          select.value = i;
+          break;
+        }
+      }
+    }
+  });
+}
+// Populate preview table
+function populatePreviewTable() {
+  const previewEl = document.getElementById('importPreview');
+  if (!previewEl) return;
+  
+  if (!csvData || csvData.length === 0) {
+    previewEl.innerHTML = '<p>No data to preview</p>';
+    return;
+  }
+
+  // Create table HTML structure
+  let html = '<table border="1" cellspacing="0" cellpadding="4" style="border-collapse:collapse; width:100%; font-size:12px;">';
+  
+  // Add header row
+  html += '<thead><tr style="background:#f0f0f0;">';
+  ['Summary', 'Key', 'Description', 'Link', 'Estimate'].forEach(headerText => {
+    html += `<th style="padding:6px; border:1px solid #ccc;">${headerText}</th>`;
+  });
+  html += '</tr></thead>';
+  
+  // Add data rows (show first 5 rows as preview)
+  html += '<tbody>';
+  const previewData = csvData.slice(0, 5);
+  
+  previewData.forEach(row => {
+    html += '<tr>';
+    
+    // Get mapping values
+    const summaryIndex = document.getElementById('summaryMapping')?.value || '';
+    const keyIndex = document.getElementById('keyMapping')?.value || '';
+    const descIndex = document.getElementById('descriptionMapping')?.value || '';
+    const linkIndex = document.getElementById('linkMapping')?.value || '';
+    const estimateIndex = document.getElementById('estimateMapping')?.value || '';
+    
+    // Extract values based on mappings
+    const values = [
+      summaryIndex !== '' ? (row[parseInt(summaryIndex)] || '') : '',
+      keyIndex !== '' ? (row[parseInt(keyIndex)] || '') : '',
+      descIndex !== '' ? (row[parseInt(descIndex)] || '') : '',
+      linkIndex !== '' ? (row[parseInt(linkIndex)] || '') : '',
+      estimateIndex !== '' ? (row[parseInt(estimateIndex)] || '') : ''
+    ];
+    
+    values.forEach(value => {
+      const cellValue = String(value).substring(0, 50); // Limit cell content length
+      html += `<td style="padding:6px; border:1px solid #ccc; max-width:150px; overflow:hidden; text-overflow:ellipsis;">${cellValue}</td>`;
+    });
+    
+    html += '</tr>';
+  });
+  
+  html += '</tbody></table>';
+  
+  if (csvData.length > 5) {
+    html += `<p style="font-size:12px; color:#666; margin-top:8px;">Showing first 5 rows of ${csvData.length} total rows</p>`;
+  }
+  
+  previewEl.innerHTML = html;
+}
+
+// Handle CSV Import - FIXED VERSION
+function handleCsvImport() {
+  if (importInProgress) {
+    console.log('Import already in progress');
+    return;
+  }
+  
+  console.log('Starting CSV import...');
+  console.log('Selected file:', selectedCsvFile?.name);
+  console.log('CSV data rows:', csvData.length);
+  
+  if (!csvData || csvData.length === 0) {
+    alert('No CSV data to import. Please select a valid CSV file.');
+    return;
+  }
+  
+  importInProgress = true;
+  
+  try {
+    const summaryMapping = document.getElementById('summaryMapping')?.value || '';
+    const keyMapping = document.getElementById('keyMapping')?.value || '';
+    const descMapping = document.getElementById('descriptionMapping')?.value || '';
+    
+    if (!summaryMapping && !keyMapping) {
+      alert('Please select at least Summary or Key field mapping.');
+      importInProgress = false;
+      return;
+    }
+    
+    console.log('Import mappings - Summary:', summaryMapping, 'Key:', keyMapping, 'Desc:', descMapping);
+    console.log('CSV Headers:', csvHeaders);
+    console.log('Sample CSV row:', csvData[0]);
+    
+    let importedCount = 0;
+    
+    // Import each row
+    csvData.forEach((row, index) => {
+      console.log(`Processing row ${index}:`, row);
+      
+      // FIXED: Get the actual values using parseInt for mapping indices
+      const summaryIndex = summaryMapping !== '' ? parseInt(summaryMapping) : -1;
+      const keyIndex = keyMapping !== '' ? parseInt(keyMapping) : -1;
+      const descIndex = descMapping !== '' ? parseInt(descMapping) : -1;
+      
+      const summary = summaryIndex >= 0 ? (row[summaryIndex] || '').trim() : '';
+      const key = keyIndex >= 0 ? (row[keyIndex] || '').trim() : `Item_${index + 1}`;
+      const description = descIndex >= 0 ? (row[descIndex] || '').trim() : '';
+      
+      console.log(`Row ${index} extracted: summary="${summary}", key="${key}", desc="${description}"`);
+      
+      // Only import if we have meaningful data
+      if (summary || (key && key !== `Item_${index + 1}`)) {
+        // FIXED: Use the correct displayText logic
+        const displayText = summary || key;
+        
+        const ticketData = {
+          id: `story_csv_${Date.now()}_${index}`,
+          text: displayText, // This should be the main display text
+          idDisplay: key,    // This is the key/ID field
+          descriptionDisplay: description, // This is the description field
+          originalText: displayText,
+          originalLang: 'en'
+        };
+        
+        console.log('Creating ticket with correct data:', ticketData);
+        
+        // Add to UI using the main.js function
+        if (window.addTicketFromModal && typeof window.addTicketFromModal === 'function') {
+          window.addTicketFromModal(ticketData);
+          importedCount++;
+        } else {
+          console.error('addTicketFromModal function not available');
+        }
+      } else {
+        console.log(`Row ${index} skipped - no meaningful data`);
+      }
+    });
+    
+    console.log(`Import completed. Created ${importedCount} tickets.`);
+    
+    // Close modal and show success
+    hideCsvUploadModal();
+    
+  } catch (error) {
+    console.error('Error during import:', error);
+    alert('Error during import: ' + error.message);
+  } finally {
+    importInProgress = false;
+  }
+}
+
+</script>
+
+<!-- Add this just before the closing 
+<div id="exportCsvModal">
+  <div class="modal-content">
+    <h3>Export Stories to CSV</h3>
+    
+    <div class="field-mapping">
+      <div>
+        <label for="csvStoryId">Story ID:</label>
+        <select id="csvStoryId"></select>
+      </div>
+      <div>
+        <label for="csvTitle">Title/Description:</label>
+        <select id="csvTitle"></select>
+      </div>
+      <div>
+        <label for="csvPoints">Story Points:</label>
+        <select id="csvPoints"></select>
+      </div>
+      <div>
+        <label for="csvVotes">Vote Count:</label>
+        <select id="csvVotes"></select>
+      </div>
+      <div>
+        <label for="csvAverage">Average Vote:</label>
+        <select id="csvAverage"></select>
+      </div>
+    </div>
+    
+    <div class="export-options">
+      <label><input type="checkbox" id="csvHeaderRow" checked> Include header row</label>
+      <label><input type="checkbox" id="csvOnlyRevealed"> Only export stories with revealed votes</label>
+      <label><input type="checkbox" id="csvDetailedVotes"> Include detailed vote information</label>
+    </div>
+    
+    <div class="csv-preview" id="csvPreview">Preview will appear here...</div>
+    
+    <div class="button-group">
+      <button class="cancel-btn">Cancel</button>
+      <button class="confirm-btn">Export CSV</button>
+    </div>
+  </div>
+</div>
+
+</body> tag in index.html -->
+
+
+    <script type="module" src="main.js"></script>
+
+<script>
+document.getElementById('joinSessionWithName').addEventListener('click', function () {
+  const nameInput = document.getElementById('userNameInput');
+  const userName = nameInput.value.trim();
+
+  if (!userName) {
+    alert('Please enter your name to join.');
+    return;
+  }
+
+  sessionStorage.setItem('userName', userName);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  let roomId = urlParams.get('roomId');
+  if (!roomId) {
+    roomId = 'room-' + Math.floor(Math.random() * 10000);
+    const newUrl = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'roomId=' + roomId;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+  }
+
+  // Get and save Requested Host Variable before redirect
+  const requestHost = document.getElementById("allowJoinAsHost").checked;
+  sessionStorage.setItem("requestedHost", requestHost);
+
+  // Load the new page
+  window.location.href = "index.html?roomId=" + roomId;
+
+  document.getElementById('loginModalCustom').style.display = 'none';
+});
+</script>
+
+<!-- Translation Loading Overlay (for language-manager.js) -->
+<div id="translationOverlay" style="display:none; position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:10001; background:rgba(0,0,0,0.45); color: white; font-size: 2em; align-items:center;justify-content:center; flex-direction:column;">
+  <div class="loading-spinner" style="margin-bottom:16px;"></div>
+  Translating, please wait...
+</div>
+  <!-- Premium Upgrade Modal -->
+<div id="premiumModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:10000; align-items:center; justify-content:center;">
+  <div style="background:white; padding:24px 32px; border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,0.2); max-width:400px; text-align:center;">
+    <h2 style="margin-bottom:12px;">🔒 Premium Feature</h2>
+    <p style="margin-bottom:20px;">This feature is only available in the Premium version.</p>
+    <button onclick="closePremiumModal()" style="padding:8px 16px; background:#753acb; color:white; border:none; border-radius:5px; cursor:pointer;">Got it</button>
+  </div>
+</div>
+
+
+<div id="exportCsvModal">
+  <div class="modal-content">
+    <h3>Export Stories to CSV</h3>
+    
+    <div class="field-mapping">
+      <div>
+        <label for="csvStoryId">Story ID:</label>
+        <select id="csvStoryId"></select>
+      </div>
+      <div>
+        <label for="csvTitle">Title/Description:</label>
+        <select id="csvTitle"></select>
+      </div>
+      <div>
+        <label for="csvPoints">Story Points:</label>
+        <select id="csvPoints"></select>
+      </div>
+      <div>
+        <label for="csvVotes">Vote Count:</label>
+        <select id="csvVotes"></select>
+      </div>
+      <div>
+        <label for="csvAverage">Average Vote:</label>
+        <select id="csvAverage"></select>
+      </div>
+    </div>
+    
+    <div class="export-options">
+      <label><input type="checkbox" id="csvHeaderRow" checked> Include header row</label>
+      <label><input type="checkbox" id="csvOnlyRevealed"> Only export stories with revealed votes</label>
+      <label><input type="checkbox" id="csvDetailedVotes"> Include detailed vote information</label>
+    </div>
+    
+    <div class="csv-preview" id="csvPreview">Preview will appear here...</div>
+    
+    <div class="button-group">
+      <button class="cancel-btn">Cancel</button>
+      <button class="confirm-btn">Export CSV</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+  
