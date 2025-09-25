@@ -438,7 +438,7 @@
           <li><a href="#">About Us</a></li>
           <li><a href="#">Privacy Policy</a></li>
           <li><a href="#">Terms of Service</a></li>
-          <li><a href="#">Contact Us</a></li>
+          <li><a href="#" id="contactUsLink">Contact Us</a></li>
         </ul>
       </div>
       
@@ -458,6 +458,44 @@
       <p>A collaborative estimation tool for agile teams.</p>
     </div>
   </footer>
+
+  <script>
+// Trigger modal when "Contact Us" link in footer is clicked
+const contactLink = document.getElementById("contactUsLink");
+if (contactLink) {
+  contactLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("contactModal").classList.remove("hidden");
+  });
+}
+
+document.getElementById("closeModal").addEventListener("click", () => {
+  document.getElementById("contactModal").classList.add("hidden");
+});
+
+document.getElementById("contactForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const message = document.getElementById("message").value;
+
+  const response = await fetch("/send-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, message })
+  });
+
+  if (response.ok) {
+    alert("Message sent successfully!");
+    document.getElementById("contactModal").classList.add("hidden");
+    document.getElementById("contactForm").reset();
+  } else {
+    alert("Failed to send message. Try again later.");
+  }
+});
+</script>
+
 
   <script>
     // Mobile navigation toggle
@@ -557,6 +595,21 @@ document.addEventListener('DOMContentLoaded', function() {
   <button class="scroll-to-top" id="scrollToTop" aria-label="Scroll to top">
   <i class="fas fa-arrow-up"></i>
 </button>
+<!-- Contact Us Modal -->
+<div id="contactModal" class="modal hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  <div class="bg-white p-6 rounded-2xl w-96 relative">
+    <button id="closeModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">X</button>
+    <h2 class="text-xl mb-4 text-center">Contact Us</h2>
+    <form id="contactForm">
+      <input type="text" id="name" placeholder="Your Name" class="w-full p-2 border rounded mb-3" required>
+      <input type="email" id="email" placeholder="Your Email" class="w-full p-2 border rounded mb-3" required>
+      <textarea id="message" placeholder="Your Message" class="w-full p-2 border rounded mb-3" required></textarea>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded w-full">Send Message</button>
+    </form>
+  </div>
+</div>
+
+  
 </body>
 </html>
 
