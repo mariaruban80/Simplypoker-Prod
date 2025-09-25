@@ -458,45 +458,60 @@
       <p>A collaborative estimation tool for agile teams.</p>
     </div>
   </footer>
-
-  <script>
-// Trigger modal when "Contact Us" link in footer is clicked
+<script>
 document.addEventListener("DOMContentLoaded", () => {
-const contactLink = document.getElementById("contactUsLink");
-if (contactLink) {
-  contactLink.addEventListener("click", (e) => {
-    e.preventDefault();
-    document.getElementById("contactModal").classList.remove("hidden");
-  });
-}
+  const contactLink = document.getElementById("contactUsLink");
+  const modal = document.getElementById("contactModal");
+  const closeModalBtn = document.getElementById("closeModal");
+  const contactForm = document.getElementById("contactForm");
 
-document.getElementById("closeModal").addEventListener("click", () => {
-  document.getElementById("contactModal").classList.add("hidden");
-});
-
-document.getElementById("contactForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const name = document.getElementById("name").value;
-  const email = document.getElementById("email").value;
-  const message = document.getElementById("message").value;
-
-  const response = await fetch("/send-email", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, message })
-  });
-
-  if (response.ok) {
-    alert("Message sent successfully!");
-    document.getElementById("contactModal").classList.add("hidden");
-    document.getElementById("contactForm").reset();
-  } else {
-    alert("Failed to send message. Try again later.");
+  // Show modal when Contact Us link is clicked
+  if (contactLink) {
+    contactLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      modal.classList.remove("hidden");
+    });
   }
-}
+
+  // Close modal when X button is clicked
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener("click", () => {
+      modal.classList.add("hidden");
+    });
+  }
+
+  // Handle form submit
+  if (contactForm) {
+    contactForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const message = document.getElementById("message").value;
+
+      try {
+        const response = await fetch("/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, message })
+        });
+
+        if (response.ok) {
+          alert("Message sent successfully!");
+          modal.classList.add("hidden");
+          contactForm.reset();
+        } else {
+          alert("Failed to send message. Try again later.");
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("An error occurred while sending the message.");
+      }
+    });
+  }
 });
 </script>
+
 
 
   <script>
