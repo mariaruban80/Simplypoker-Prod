@@ -461,6 +461,7 @@
 
   <script>
 // Trigger modal when "Contact Us" link in footer is clicked
+document.addEventListener("DOMContentLoaded", () => {
 const contactLink = document.getElementById("contactUsLink");
 if (contactLink) {
   contactLink.addEventListener("click", (e) => {
@@ -493,6 +494,7 @@ document.getElementById("contactForm").addEventListener("submit", async (e) => {
   } else {
     alert("Failed to send message. Try again later.");
   }
+}
 });
 </script>
 
