@@ -4,7 +4,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import nodemailer from "nodemailer";
+
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -157,58 +157,40 @@ app.post('/api/jira/test-anonymous', async (req, res) => {
 
 // =================== CONTACT US ROUTE ===================
 app.post("/api/contact", async (req, res) => {
-const { name, email, feedback } = req.body;
+  const { name, email, feedback } = req.body;
 
+  if (!name || !email || !feedback) {
+    return res.status(400).json({ success: false, error: "All fields required" });
+  }
 
-if (!name || !email || !feedback) {
-return res.status(400).json({ success: false, error: "All fields required" });
-}
+  try {
+    // Configure Nodemailer transporter
+    let transporter = nodemailer.createTransport({
+      service: "gmail", // Or your SMTP provider
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
 
+    // Send email
+    await transporter.sendMail({
+      from: `"Simply Poker Contact" <${process.env.EMAIL_USER}>`,
+      to: process.env.EMAIL_TO, // Hardcoded recipient in Render env vars
+      subject: "New Feedback from Contact Form",
+      text: `Name: ${name}\nEmail: ${email}\nFeedback: ${feedback}`,
+      html: `<p><strong>Name:</strong> ${name}</p>
+             <p><strong>Email:</strong> ${email}</p>
+             <p><strong>Feedback:</strong> ${feedback}</p>`
+    });
 
-try {
-let transporter;
-
-
-if (process.env.SMTP_HOST) {
-// ✅ Generic SMTP provider (SendGrid, Mailgun, etc.)
-transporter = nodemailer.createTransport({
-host: process.env.SMTP_HOST,
-port: process.env.SMTP_PORT || 587,
-secure: process.env.SMTP_SECURE === "true",
-auth: {
-user: process.env.SMTP_USER,
-pass: process.env.SMTP_PASS,
-},
-});
-} else {
-// ✅ Default Gmail config
-transporter = nodemailer.createTransport({
-service: "gmail",
-auth: {
-user: process.env.EMAIL_USER,
-pass: process.env.EMAIL_PASS,
-},
-});
-}
-
-
-await transporter.sendMail({
-from: process.env.EMAIL_USER || process.env.SMTP_USER,
-to: process.env.EMAIL_TO,
-subject: "New Contact Form Message",
-text: `Name: ${name}\nEmail: ${email}\nMessage: ${feedback}`,
-html: `<p><strong>Name:</strong> ${name}</p>
-<p><strong>Email:</strong> ${email}</p>
-<p><strong>Message:</strong> ${feedback}</p>`
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Email error:", err);
+    res.status(500).json({ success: false, error: "Failed to send email" });
+  }
 });
 
-
-res.json({ success: true });
-} catch (err) {
-console.error("Email error:", err);
-res.status(500).json({ success: false, error: "Failed to send email" });
-}
-});
 
 
 
@@ -402,49 +384,61 @@ console.log(`[SERVER] New client connected: ${socket.id}`);
   // ==========================
   // Join Session + Decide Role
   // ==========================
-  socket.on("joinSession", ({ sessionId, requestedHost, name }, callback) => {
-  if (!rooms[sessionId]) {
-    rooms[sessionId] = { users: {}, host: null };
-  }
+  socket.on('joinSession', ({ sessionId, requestedHost, name }, callback) => {
+    console.log(`[SERVER] joinSession received: ${sessionId}, requestedHost: ${requestedHost}, name: ${name}`);
+    
+    socket.userName = name;
+    socket.sessionId = sessionId;
+    socket.join(sessionId);
 
-  const room = rooms[sessionId];
-  const user = { id: socket.id, name, isHost: false };
+    let currentHost = sessionHosts.get(sessionId);
+    const hostSocket = currentHost ? io.sockets.sockets.get(currentHost) : null;
 
-  // ✅ Only allow host if explicitly requested AND no host exists
-  if (requestedHost && !room.host) {
-    user.isHost = true;
-    room.host = socket.id;
-  }
-
-  room.users[socket.id] = user;
-
-  socket.join(sessionId);
-
-  if (typeof callback === "function") {
-    callback({ isHost: user.isHost });
-  }
-
-  io.to(sessionId).emit("userListUpdate", Object.values(room.users));
-});
-
-
-socket.on("disconnect", () => {
-  for (const roomId in rooms) {
-    if (rooms[roomId].users && rooms[roomId].users[socket.id]) {
-      // Remove the user
-      delete rooms[roomId].users[socket.id];
-
-      // If this user was host, reset the host
-      if (rooms[roomId].host === socket.id) {
-        rooms[roomId].host = null;
-      }
-
-      // Broadcast updated user list
-      io.to(roomId).emit("userListUpdate", Object.values(rooms[roomId].users));
+    // Clean up invalid host references
+    if (currentHost && !hostSocket) {
+      sessionHosts.delete(sessionId);
+      currentHost = null;
     }
-  }
-});
 
+    let isHost = false;
+
+    // Determine if this user should be host
+    if (!currentHost) {
+      // No host exists, make this user the host
+      isHost = true;
+    } else if (requestedHost) {
+      // User requested host but one already exists
+      isHost = false;
+    }
+
+    if (isHost) {
+      socket.isHost = true;
+      sessionHosts.set(sessionId, socket.id);
+      io.to(sessionId).emit('hostChanged', { userName: name, hostId: socket.id });
+      console.log(`[SERVER] ${name} is now host for ${sessionId}`);
+    } else {
+      socket.isHost = false;
+      console.log(`[SERVER] ${name} joined as guest in ${sessionId}`);
+    }
+
+    // Send response back to client
+    if (callback) {
+      callback({ 
+        isHost: isHost,
+        reason: (!isHost && currentHost) ? 'Host already exists' : undefined
+      });
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`[SERVER] Socket ${socket.id} disconnected`);
+    
+    if (socket.sessionId && sessionHosts.get(socket.sessionId) === socket.id) {
+      console.log(`[SERVER] Host ${socket.userName} disconnected from ${socket.sessionId}`);
+      sessionHosts.delete(socket.sessionId);
+      io.to(socket.sessionId).emit('hostLeft');
+    }
+  });
 
 // Handle host role request
 socket.on("requestHost", (data, callback) => {
