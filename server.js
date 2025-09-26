@@ -431,9 +431,10 @@ console.log(`[SERVER] New client connected: ${socket.id}`);
 socket.on("disconnect", () => {
   for (const roomId in rooms) {
     if (rooms[roomId].users && rooms[roomId].users[socket.id]) {
+      // Remove the user
       delete rooms[roomId].users[socket.id];
 
-      // If this user was host, free up the host slot
+      // If this user was host, reset the host
       if (rooms[roomId].host === socket.id) {
         rooms[roomId].host = null;
       }
