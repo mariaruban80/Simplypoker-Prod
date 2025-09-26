@@ -428,15 +428,22 @@ console.log(`[SERVER] New client connected: ${socket.id}`);
 });
 
 
-  socket.on('disconnect', () => {
-    console.log(`[SERVER] Socket ${socket.id} disconnected`);
-    
-    if (socket.sessionId && sessionHosts.get(socket.sessionId) === socket.id) {
-      console.log(`[SERVER] Host ${socket.userName} disconnected from ${socket.sessionId}`);
-      sessionHosts.delete(socket.sessionId);
-      io.to(socket.sessionId).emit('hostLeft');
+socket.on("disconnect", () => {
+  for (const roomId in rooms) {
+    if (rooms[roomId].users && rooms[roomId].users[socket.id]) {
+      delete rooms[roomId].users[socket.id];
+
+      // If this user was host, free up the host slot
+      if (rooms[roomId].host === socket.id) {
+        rooms[roomId].host = null;
+      }
+
+      // Broadcast updated user list
+      io.to(roomId).emit("userListUpdate", Object.values(rooms[roomId].users));
     }
-  });
+  }
+});
+
 
 // Handle host role request
 socket.on("requestHost", (data, callback) => {
