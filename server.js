@@ -1,3 +1,4 @@
+
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -419,15 +420,14 @@ console.log(`[SERVER] New client connected: ${socket.id}`);
 
     let isHost = false;
 
-   // Determine if this user should be host
-  if (requestedHost && !currentHost) {
-    // Only assign host if explicitly requested AND no host exists
-    isHost = true;
-  } else {
-    // Otherwise, always guest
-    isHost = false;
-  }
-
+    // Determine if this user should be host
+    if (!currentHost) {
+      // No host exists, make this user the host
+      isHost = true;
+    } else if (requestedHost) {
+      // User requested host but one already exists
+      isHost = false;
+    }
 
     if (isHost) {
       socket.isHost = true;
