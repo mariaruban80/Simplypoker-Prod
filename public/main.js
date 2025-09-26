@@ -639,7 +639,7 @@ socket.on("connect", () => {
 
   const sessionId = new URLSearchParams(location.search).get('roomId');
   const name = sessionStorage.getItem('userName') || 'Guest';
-  const requestedHost = sessionStorage.getItem('isRoomCreator') === 'true'; // Use room creator status
+//  const requestedHost = sessionStorage.getItem('isRoomCreator') === 'true'; // Use room creator status
 const isRoomCreator = sessionStorage.getItem('isRoomCreator') === 'true';
 const requestedHost = isRoomCreator;  
 
