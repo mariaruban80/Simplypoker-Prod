@@ -2818,6 +2818,22 @@ document.getElementById('joinSessionWithName').addEventListener('click', functio
     </div>
   </div>
 </div>
+<script>
+  // Force correct role on page load
+  document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (urlParams.has("roomId")) {
+      // ✅ Invite link → always guest
+      sessionStorage.setItem("isRoomCreator", "false");
+    } else {
+      // ✅ No roomId → this is the room creator (host)
+      sessionStorage.setItem("isRoomCreator", "true");
+    }
+  });
+</script>
+</body>
+</html>
 
 </body>
 </html>
