@@ -14,6 +14,22 @@
 <script src="language-manager.js"></script>
 <script src="jira-integration.js"></script>
 <script type="module" src="/socket.io/socket.io.js"></script>
+<script>
+  (function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomId = urlParams.get("roomId");
+
+    if (roomId) {
+      // Invite link join → always guest
+      sessionStorage.setItem("isRoomCreator", "false");
+    } else {
+      // No roomId → creator → host
+      sessionStorage.setItem("isRoomCreator", "true");
+    }
+  })();
+</script>  
+    
+    
 <script type="module" src="main.js"></script>      
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
 <title>Planning Poker Interactive</title>
