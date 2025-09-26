@@ -140,16 +140,36 @@ if (centerRevealBtn) {
 }
 
 function updateUserListUI(users) {
-  const userListEl = document.getElementById("user-list"); // whatever your container is
+  const userListEl = document.getElementById("user-list");
   if (!userListEl) return;
 
   userListEl.innerHTML = ""; // clear existing
   users.forEach(u => {
     const li = document.createElement("li");
-    li.textContent = `${u.name}${u.isHost ? " (Host)" : ""}`;
+
+    // optional avatar/online indicator
+    const indicator = document.createElement("span");
+    indicator.textContent = "🟢 ";
+    li.appendChild(indicator);
+
+    // host crown
+    if (u.isHost) {
+      const crown = document.createElement("span");
+      crown.textContent = "👑 ";
+      crown.style.color = "#f4c542"; // golden yellow
+      li.appendChild(crown);
+
+      const strong = document.createElement("strong");
+      strong.textContent = u.name;
+      li.appendChild(strong);
+    } else {
+      li.appendChild(document.createTextNode(u.name));
+    }
+
     userListEl.appendChild(li);
   });
 }
+
 
 
 /**
