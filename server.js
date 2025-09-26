@@ -4,7 +4,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-
+import nodemailer from "nodemailer";
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -157,40 +157,58 @@ app.post('/api/jira/test-anonymous', async (req, res) => {
 
 // =================== CONTACT US ROUTE ===================
 app.post("/api/contact", async (req, res) => {
-  const { name, email, feedback } = req.body;
+const { name, email, feedback } = req.body;
 
-  if (!name || !email || !feedback) {
-    return res.status(400).json({ success: false, error: "All fields required" });
-  }
 
-  try {
-    // Configure Nodemailer transporter
-    let transporter = nodemailer.createTransport({
-      service: "gmail", // Or your SMTP provider
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
+if (!name || !email || !feedback) {
+return res.status(400).json({ success: false, error: "All fields required" });
+}
 
-    // Send email
-    await transporter.sendMail({
-      from: `"Simply Poker Contact" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_TO, // Hardcoded recipient in Render env vars
-      subject: "New Feedback from Contact Form",
-      text: `Name: ${name}\nEmail: ${email}\nFeedback: ${feedback}`,
-      html: `<p><strong>Name:</strong> ${name}</p>
-             <p><strong>Email:</strong> ${email}</p>
-             <p><strong>Feedback:</strong> ${feedback}</p>`
-    });
 
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Email error:", err);
-    res.status(500).json({ success: false, error: "Failed to send email" });
-  }
+try {
+let transporter;
+
+
+if (process.env.SMTP_HOST) {
+// ✅ Generic SMTP provider (SendGrid, Mailgun, etc.)
+transporter = nodemailer.createTransport({
+host: process.env.SMTP_HOST,
+port: process.env.SMTP_PORT || 587,
+secure: process.env.SMTP_SECURE === "true",
+auth: {
+user: process.env.SMTP_USER,
+pass: process.env.SMTP_PASS,
+},
+});
+} else {
+// ✅ Default Gmail config
+transporter = nodemailer.createTransport({
+service: "gmail",
+auth: {
+user: process.env.EMAIL_USER,
+pass: process.env.EMAIL_PASS,
+},
+});
+}
+
+
+await transporter.sendMail({
+from: process.env.EMAIL_USER || process.env.SMTP_USER,
+to: process.env.EMAIL_TO,
+subject: "New Contact Form Message",
+text: `Name: ${name}\nEmail: ${email}\nMessage: ${feedback}`,
+html: `<p><strong>Name:</strong> ${name}</p>
+<p><strong>Email:</strong> ${email}</p>
+<p><strong>Message:</strong> ${feedback}</p>`
 });
 
+
+res.json({ success: true });
+} catch (err) {
+console.error("Email error:", err);
+res.status(500).json({ success: false, error: "Failed to send email" });
+}
+});
 
 
 
