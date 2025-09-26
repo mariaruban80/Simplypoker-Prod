@@ -4,6 +4,8 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import sgMail from "@sendgrid/mail";
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const app = express();
 const httpServer = createServer(app);
@@ -154,7 +156,6 @@ app.post('/api/jira/test-anonymous', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-
 // =================== CONTACT US ROUTE ===================
 app.post("/api/contact", async (req, res) => {
   const { name, email, feedback } = req.body;
@@ -163,33 +164,26 @@ app.post("/api/contact", async (req, res) => {
     return res.status(400).json({ success: false, error: "All fields required" });
   }
 
+  const msg = {
+    to: process.env.EMAIL_TO,               // recipient (hardcoded in env var)
+    from: process.env.EMAIL_FROM,           // must be verified in SendGrid
+    subject: "New Feedback from Contact Form",
+    text: `Name: ${name}\nEmail: ${email}\nFeedback: ${feedback}`,
+    html: `<p><strong>Name:</strong> ${name}</p>
+           <p><strong>Email:</strong> ${email}</p>
+           <p><strong>Feedback:</strong> ${feedback}</p>`
+  };
+
   try {
-    // Configure Nodemailer transporter
-    let transporter = nodemailer.createTransport({
-      service: "gmail", // Or your SMTP provider
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
-
-    // Send email
-    await transporter.sendMail({
-      from: `"Simply Poker Contact" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_TO, // Hardcoded recipient in Render env vars
-      subject: "New Feedback from Contact Form",
-      text: `Name: ${name}\nEmail: ${email}\nFeedback: ${feedback}`,
-      html: `<p><strong>Name:</strong> ${name}</p>
-             <p><strong>Email:</strong> ${email}</p>
-             <p><strong>Feedback:</strong> ${feedback}</p>`
-    });
-
+    await sgMail.send(msg);
     res.json({ success: true });
   } catch (err) {
-    console.error("Email error:", err);
+    console.error("SendGrid error:", err);
     res.status(500).json({ success: false, error: "Failed to send email" });
   }
 });
+
+
 
 
 // Enhanced room structure with improved state management
