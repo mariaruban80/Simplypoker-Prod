@@ -155,6 +155,43 @@ app.post('/api/jira/test-anonymous', async (req, res) => {
   }
 });
 
+// =================== CONTACT US ROUTE ===================
+app.post("/api/contact", async (req, res) => {
+  const { name, email, feedback } = req.body;
+
+  if (!name || !email || !feedback) {
+    return res.status(400).json({ success: false, error: "All fields required" });
+  }
+
+  try {
+    // Configure Nodemailer transporter
+    let transporter = nodemailer.createTransport({
+      service: "gmail", // Or your SMTP provider
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    // Send email
+    await transporter.sendMail({
+      from: `"Simply Poker Contact" <${process.env.EMAIL_USER}>`,
+      to: process.env.EMAIL_TO, // Hardcoded recipient in Render env vars
+      subject: "New Feedback from Contact Form",
+      text: `Name: ${name}\nEmail: ${email}\nFeedback: ${feedback}`,
+      html: `<p><strong>Name:</strong> ${name}</p>
+             <p><strong>Email:</strong> ${email}</p>
+             <p><strong>Feedback:</strong> ${feedback}</p>`
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Email error:", err);
+    res.status(500).json({ success: false, error: "Failed to send email" });
+  }
+});
+
+
 // Enhanced room structure with improved state management
 const rooms = {}; // roomId: { users, votes, story, revealed, csvData, selectedIndex, votesPerStory, votesRevealed, tickets, deletedStoryIds, deletedStoriesTimestamp, userNameVotes }
 const roomVotingSystems = {}; // roomId → voting system
