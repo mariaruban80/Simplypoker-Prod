@@ -639,24 +639,23 @@ socket.on("connect", () => {
 
   const sessionId = new URLSearchParams(location.search).get('roomId');
   const name = sessionStorage.getItem('userName') || 'Guest';
-//  const requestedHost = sessionStorage.getItem('isRoomCreator') === 'true'; // Use room creator status
-const isRoomCreator = sessionStorage.getItem('isRoomCreator') === 'true';
-const requestedHost = isRoomCreator;  
+  const requestedHost = sessionStorage.getItem('isRoomCreator') === 'true'; // Use room creator status
 
-socket.emit('joinSession', { sessionId, requestedHost, name }, (response) => {
-  console.log('[SOCKET] Join response:', response);
+  // Join session with proper host request
+  socket.emit('joinSession', { sessionId, requestedHost, name }, (response) => {
+    console.log('[SOCKET] Join response:', response);
+    
+    const isHost = !!(response && response.isHost);
+    sessionStorage.setItem('isHost', isHost ? 'true' : 'false');
 
-  const isHost = !!(response && response.isHost);
-  sessionStorage.setItem('isHost', isHost ? 'true' : 'false');
-
-  if (isHost) {
-    enableHostFeatures();
-    console.log('[SOCKET] Confirmed as host by server');
-  } else {
-    disableHostFeatures();
-    console.log('[SOCKET] Confirmed as guest by server');
-  }
-});
+    if (isHost) {
+      enableHostFeatures();
+      console.log('[SOCKET] Confirmed as host by server');
+    } else {
+      disableHostFeatures();
+      console.log('[SOCKET] Confirmed as guest by server');
+    }
+  });
     socket.on("hostResponse", (res) => {
     const hostToggle = document.getElementById("hostToggle");
     if (!hostToggle) return;
