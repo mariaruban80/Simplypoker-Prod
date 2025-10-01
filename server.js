@@ -402,51 +402,49 @@ console.log(`[SERVER] New client connected: ${socket.id}`);
   // ==========================
   // Join Session + Decide Role
   // ==========================
-  socket.on('joinSession', ({ sessionId, requestedHost, name }, callback) => {
-    console.log(`[SERVER] joinSession received: ${sessionId}, requestedHost: ${requestedHost}, name: ${name}`);
-    
-    socket.userName = name;
-    socket.sessionId = sessionId;
-    socket.join(sessionId);
+socket.on('joinSession', ({ sessionId, requestedHost, name }, callback) => {
+  console.log(`[SERVER] joinSession received: ${sessionId}, requestedHost: ${requestedHost}, name: ${name}`);
 
-    let currentHost = sessionHosts.get(sessionId);
-    const hostSocket = currentHost ? io.sockets.sockets.get(currentHost) : null;
+  socket.userName = name;
+  socket.sessionId = sessionId;
+  socket.join(sessionId);
 
-    // Clean up invalid host references
-    if (currentHost && !hostSocket) {
-      sessionHosts.delete(sessionId);
-      currentHost = null;
-    }
+  let currentHost = sessionHosts.get(sessionId);
+  const hostSocket = currentHost ? io.sockets.sockets.get(currentHost) : null;
 
-    let isHost = false;
+  // Clean up invalid host references
+  if (currentHost && !hostSocket) {
+    sessionHosts.delete(sessionId);
+    currentHost = null;
+  }
 
-    // Determine if this user should be host
-    if (!currentHost) {
-      // No host exists, make this user the host
-      isHost = true;
-    } else if (requestedHost) {
-      // User requested host but one already exists
-      isHost = false;
-    }
+  let isHost = false;
 
-    if (isHost) {
-      socket.isHost = true;
-      sessionHosts.set(sessionId, socket.id);
-      io.to(sessionId).emit('hostChanged', { userName: name, hostId: socket.id });
-      console.log(`[SERVER] ${name} is now host for ${sessionId}`);
-    } else {
-      socket.isHost = false;
-      console.log(`[SERVER] ${name} joined as guest in ${sessionId}`);
-    }
+  // ✅ Only allow host if user explicitly requested it (isRoomCreator)
+  if (requestedHost && !currentHost) {
+    isHost = true;
+  } else {
+    isHost = false; // Always guest if not creator
+  }
 
-    // Send response back to client
-    if (callback) {
-      callback({ 
-        isHost: isHost,
-        reason: (!isHost && currentHost) ? 'Host already exists' : undefined
-      });
-    }
-  });
+  if (isHost) {
+    socket.isHost = true;
+    sessionHosts.set(sessionId, socket.id);
+    io.to(sessionId).emit('hostChanged', { userName: name, hostId: socket.id });
+    console.log(`[SERVER] ${name} is now host for ${sessionId}`);
+  } else {
+    socket.isHost = false;
+    console.log(`[SERVER] ${name} joined as guest in ${sessionId}`);
+  }
+
+  if (callback) {
+    callback({
+      isHost: isHost,
+      reason: (!isHost && currentHost) ? 'Host already exists or not creator' : undefined
+    });
+  }
+});
+
 
   socket.on('disconnect', () => {
     console.log(`[SERVER] Socket ${socket.id} disconnected`);
