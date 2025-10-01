@@ -165,7 +165,14 @@ function refreshHostUI() {
     addTicketBtn.disabled = !isHost;
   }
 }
-
+// 🔹 Safeguard: ensure host UI is refreshed after DOM fully loads
+document.addEventListener('DOMContentLoaded', () => {
+const isHost = sessionStorage.getItem('isHost') === 'true';
+if (isHost) {
+console.log('[INIT] Refreshing host UI after DOM ready');
+refreshHostUI();
+}
+})
 
 
 function updateUserListUI(users) {
