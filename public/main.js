@@ -1695,10 +1695,18 @@ function initializeApp(roomId) {
   });
 
 
-socket.on('hostChanged', ({ hostId, userName }) => {
-  console.log(`[HOST] Host changed: ${userName}`);
-
+if (typeof socket !== 'undefined') {
+socket.on('hostChanged', ({ userName, hostId }) => {
+const isHost = sessionStorage.getItem('userName') === userName;
+sessionStorage.setItem('isHost', isHost ? 'true' : 'false');
+if (isHost) {
+enableHostFeatures();
+} else {
+disableHostFeatures();
+}
+refreshHostUI();
 });
+}
 
 socket.on('hostLeft', () => {
   console.log('[HOST] Host left — room is free now');
