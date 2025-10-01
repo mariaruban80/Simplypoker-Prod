@@ -54,13 +54,13 @@ function enableHostFeatures() {
   
   // Update session storage
   sessionStorage.setItem('isHost', 'true');
+
   // Disable Host toggle when user becomes host
   const hostToggle = document.getElementById("hostModeToggle");
   if (hostToggle) {
     hostToggle.checked = true;
     hostToggle.disabled = true;   // 🔹 Prevent further changes
-  
- // Add visual indication that it's disabled
+
     const toggleContainer = hostToggle.closest('.toggle-container') || hostToggle.parentElement;
     if (toggleContainer) {
       toggleContainer.classList.add('host-toggle-disabled');
@@ -94,13 +94,14 @@ function enableHostFeatures() {
     }
   });
 
+  // Center reveal button
   const centerRevealBtn = document.querySelector('.reveal-votes-button');
-if (centerRevealBtn) {
-  centerRevealBtn.style.display = 'block';
-  centerRevealBtn.disabled = false;
-  centerRevealBtn.classList.remove('hide-for-guests');
-}
-  
+  if (centerRevealBtn) {
+    centerRevealBtn.style.display = 'block';
+    centerRevealBtn.disabled = false;
+    centerRevealBtn.classList.remove('hide-for-guests');
+  }
+
   // Show add ticket button
   const addTicketBtn = document.getElementById('addTicketBtn');
   if (addTicketBtn) {
@@ -122,22 +123,50 @@ if (centerRevealBtn) {
   // Remove guest restrictions from story cards
   document.querySelectorAll('.story-card').forEach(card => {
     card.classList.remove('disabled-story');
-    
-    // Re-enable click handlers
     const index = parseInt(card.dataset.index);
     if (!isNaN(index)) {
       card.onclick = () => selectStory(index);
     }
   });
-  
+
   // Enable planning cards
   document.querySelectorAll('#planningCards .card').forEach(card => {
     card.classList.remove('disabled');
     card.setAttribute('draggable', 'true');
   });
-//  updateUserList(rooms[roomId].users); 
+
+  // 🔹 Refresh menus immediately to ensure visibility
+  refreshHostUI();
+
   console.log('[HOST] Host features enabled successfully');
 }
+
+/**
+ * Ensure UI updates everywhere when host is confirmed
+ */
+function refreshHostUI() {
+  const isHost = sessionStorage.getItem('isHost') === 'true';
+
+  ['uploadTicketMenuBtn','exportToCsvMenuBtn','jiraImportMenuBtn']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = isHost ? 'flex' : 'none';
+    });
+
+  const centerRevealBtn = document.querySelector('.reveal-votes-button');
+  if (centerRevealBtn) {
+    centerRevealBtn.style.display = isHost ? 'block' : 'none';
+    centerRevealBtn.disabled = !isHost;
+  }
+
+  const addTicketBtn = document.getElementById('addTicketBtn');
+  if (addTicketBtn) {
+    addTicketBtn.style.display = isHost ? 'flex' : 'none';
+    addTicketBtn.disabled = !isHost;
+  }
+}
+
+
 
 function updateUserListUI(users) {
   const userListEl = document.getElementById("user-list");
@@ -671,6 +700,9 @@ socket.on("connect", () => {
     if (isHost) {
       enableHostFeatures();
       console.log('[SOCKET] Confirmed as host by server');
+        // 🔹 Ensure menus update immediately for host
+      updateUserListUI([{ name, isHost: true }]); // optional
+      refreshHostUI();  
     } else {
       disableHostFeatures();
       console.log('[SOCKET] Confirmed as guest by server');
