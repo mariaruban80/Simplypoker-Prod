@@ -54,13 +54,13 @@ function enableHostFeatures() {
   
   // Update session storage
   sessionStorage.setItem('isHost', 'true');
-
   // Disable Host toggle when user becomes host
   const hostToggle = document.getElementById("hostModeToggle");
   if (hostToggle) {
     hostToggle.checked = true;
     hostToggle.disabled = true;   // 🔹 Prevent further changes
-
+  
+ // Add visual indication that it's disabled
     const toggleContainer = hostToggle.closest('.toggle-container') || hostToggle.parentElement;
     if (toggleContainer) {
       toggleContainer.classList.add('host-toggle-disabled');
@@ -94,14 +94,13 @@ function enableHostFeatures() {
     }
   });
 
-  // Center reveal button
   const centerRevealBtn = document.querySelector('.reveal-votes-button');
-  if (centerRevealBtn) {
-    centerRevealBtn.style.display = 'block';
-    centerRevealBtn.disabled = false;
-    centerRevealBtn.classList.remove('hide-for-guests');
-  }
-
+if (centerRevealBtn) {
+  centerRevealBtn.style.display = 'block';
+  centerRevealBtn.disabled = false;
+  centerRevealBtn.classList.remove('hide-for-guests');
+}
+  
   // Show add ticket button
   const addTicketBtn = document.getElementById('addTicketBtn');
   if (addTicketBtn) {
@@ -123,57 +122,22 @@ function enableHostFeatures() {
   // Remove guest restrictions from story cards
   document.querySelectorAll('.story-card').forEach(card => {
     card.classList.remove('disabled-story');
+    
+    // Re-enable click handlers
     const index = parseInt(card.dataset.index);
     if (!isNaN(index)) {
       card.onclick = () => selectStory(index);
     }
   });
-
+  
   // Enable planning cards
   document.querySelectorAll('#planningCards .card').forEach(card => {
     card.classList.remove('disabled');
     card.setAttribute('draggable', 'true');
   });
-
-  // 🔹 Refresh menus immediately to ensure visibility
-  refreshHostUI();
-
+//  updateUserList(rooms[roomId].users); 
   console.log('[HOST] Host features enabled successfully');
 }
-
-/**
- * Ensure UI updates everywhere when host is confirmed
- */
-function refreshHostUI() {
-  const isHost = sessionStorage.getItem('isHost') === 'true';
-
-  ['uploadTicketMenuBtn','exportToCsvMenuBtn','jiraImportMenuBtn']
-    .forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = isHost ? 'flex' : 'none';
-    });
-
-  const centerRevealBtn = document.querySelector('.reveal-votes-button');
-  if (centerRevealBtn) {
-    centerRevealBtn.style.display = isHost ? 'block' : 'none';
-    centerRevealBtn.disabled = !isHost;
-  }
-
-  const addTicketBtn = document.getElementById('addTicketBtn');
-  if (addTicketBtn) {
-    addTicketBtn.style.display = isHost ? 'flex' : 'none';
-    addTicketBtn.disabled = !isHost;
-  }
-}
-// 🔹 Safeguard: ensure host UI is refreshed after DOM fully loads
-document.addEventListener('DOMContentLoaded', () => {
-const isHost = sessionStorage.getItem('isHost') === 'true';
-if (isHost) {
-console.log('[INIT] Refreshing host UI after DOM ready');
-refreshHostUI();
-}
-})
-
 
 function updateUserListUI(users) {
   const userListEl = document.getElementById("user-list");
@@ -707,9 +671,6 @@ socket.on("connect", () => {
     if (isHost) {
       enableHostFeatures();
       console.log('[SOCKET] Confirmed as host by server');
-        // 🔹 Ensure menus update immediately for host
-      updateUserListUI([{ name, isHost: true }]); // optional
-      refreshHostUI();  
     } else {
       disableHostFeatures();
       console.log('[SOCKET] Confirmed as guest by server');
@@ -1695,18 +1656,10 @@ function initializeApp(roomId) {
   });
 
 
-if (typeof socket !== 'undefined') {
-socket.on('hostChanged', ({ userName, hostId }) => {
-const isHost = sessionStorage.getItem('userName') === userName;
-sessionStorage.setItem('isHost', isHost ? 'true' : 'false');
-if (isHost) {
-enableHostFeatures();
-} else {
-disableHostFeatures();
-}
-refreshHostUI();
+socket.on('hostChanged', ({ hostId, userName }) => {
+  console.log(`[HOST] Host changed: ${userName}`);
+
 });
-}
 
 socket.on('hostLeft', () => {
   console.log('[HOST] Host left — room is free now');
