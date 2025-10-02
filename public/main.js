@@ -5442,4 +5442,26 @@ if (joinBtn) {
     window.initializeSocketWithName(roomId, name);
   });
 }
+document.addEventListener("DOMContentLoaded", () => {
+  const feedbackBtn = document.getElementById("feedbackBtn");
+  const feedbackModal = document.getElementById("feedbackModal");
+  const closeFeedback = document.getElementById("closeFeedback");
+
+  feedbackBtn.addEventListener("click", () => {
+    feedbackModal.style.display = "flex";
+  });
+
+  closeFeedback.addEventListener("click", () => {
+    feedbackModal.style.display = "none";
+  });
+
+  document.getElementById("submitFeedback").addEventListener("click", () => {
+    const feedback = document.getElementById("feedbackText").value;
+    const email = document.getElementById("feedbackEmail").value;
+    console.log("Feedback submitted:", feedback, email);
+    alert("Thanks for your feedback! (email sending will be wired later)");
+    feedbackModal.style.display = "none";
+  });
+});
+
 // === END FIX ===
