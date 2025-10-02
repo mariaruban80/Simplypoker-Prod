@@ -3315,10 +3315,11 @@ input:checked + .slider:before {
 /* Modal card */
 .feedback-content {
   background: #fff;
-  padding: 20px;
-  border-radius: 12px;
-  width: 350px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  padding: 25px;
+  border-radius: 16px;
+  width: 450px; /* increased from 350px */
+  max-width: 90%;
+  box-shadow: 0 6px 25px rgba(0,0,0,0.3);
   text-align: center;
   position: relative;
   animation: fadeIn 0.3s ease-in-out;
@@ -3337,23 +3338,44 @@ input:checked + .slider:before {
 /* Emojis */
 .emoji-row {
   display: flex;
-  justify-content: space-around;
-  margin: 15px 0;
-  font-size: 26px;
+  justify-content: space-between;
+  margin: 20px 0;
+  font-size: 32px;
   cursor: pointer;
 }
+.emoji {
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
 .emoji:hover {
+  background: #f0e6ff;
   transform: scale(1.2);
+}
+.emoji.selected {
+  background: #673ab7;
+  color: #fff;
+  transform: scale(1.2);
+  box-shadow: 0 0 10px rgba(103,58,183,0.6);
 }
 
 /* Inputs */
-.feedback-content textarea,
+.feedback-content textarea {
+  width: 100%;
+  height: 120px;
+  margin: 15px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 14px;
+  resize: vertical;
+}
 .feedback-content input {
   width: 100%;
-  padding: 8px;
-  margin: 8px 0;
+  margin-bottom: 15px;
+  padding: 10px;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 14px;
 }
 
@@ -3361,9 +3383,9 @@ input:checked + .slider:before {
 .feedback-content button {
   background: #673ab7;
   color: white;
-  padding: 10px 16px;
+  padding: 12px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   width: 100%;
   font-size: 16px;
@@ -3371,7 +3393,7 @@ input:checked + .slider:before {
   transition: background 0.2s ease;
 }
 .feedback-content button:hover {
-  background: #532b9d; /* darker purple */
+  background: #532b9d;
 }
 
 @keyframes fadeIn {
