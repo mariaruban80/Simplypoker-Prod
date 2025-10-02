@@ -26,6 +26,59 @@ app.use(express.static(join(__dirname, 'public')));
 
 app.use(express.json());
 
+// Feedback email 
+
+app.post("/api/feedback", async (req, res) => {
+  const { feedback, email } = req.body;
+
+  if (!feedback || feedback.trim() === "") {
+    return res.status(400).json({ error: "Feedback message required" });
+  }
+
+  try {
+    let transporter;
+
+    if (process.env.SMTP_HOST) {
+      // ✅ Generic SMTP provider (SendGrid, Mailgun, etc.)
+      transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT || 587,
+        secure: process.env.SMTP_SECURE === "true",
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+    } else {
+      // ✅ Default Gmail config
+      transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+    }
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER || process.env.SMTP_USER,
+      to: process.env.EMAIL_TO, // hardcoded destination email in env
+      subject: "📩 New Feedback Received",
+      text: `Feedback: ${feedback}\nUser Email: ${email || "Not provided"}`,
+      html: `<p><strong>Feedback:</strong> ${feedback}</p>
+             <p><strong>User Email:</strong> ${email || "Not provided"}</p>`
+    });
+
+    console.log("✅ Feedback email sent");
+    res.json({ success: true });
+  } catch (err) {
+    console.error("❌ Email error:", err);
+    res.status(500).json({ success: false, error: "Failed to send email" });
+  }
+});
+
+
+
 // JIRA Proxy route (avoids CORS issues)
 app.post('/api/jira/project', async (req, res) => {
   const { jiraUrl, email, token, projectKey } = req.body;
