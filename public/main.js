@@ -1331,7 +1331,15 @@ document.addEventListener('DOMContentLoaded', () => {
   let roomId = getRoomIdFromURL();
   if (!roomId) {
     roomId = 'room-' + Math.floor(Math.random() * 10000);
+    //appendRoomIdToURL(roomId);
+
+    // ✅ Mark this user as the room creator/host
+    sessionStorage.setItem("isRoomCreator", "true");
+  } else {
+    // If roomId came from URL (invite link), ensure they are guest
+    sessionStorage.setItem("isRoomCreator", "false");
   }
+
   appendRoomIdToURL(roomId);
   
   loadDeletedStoriesFromStorage(roomId);
