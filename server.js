@@ -420,14 +420,16 @@ console.log(`[SERVER] New client connected: ${socket.id}`);
 
     let isHost = false;
 
-    // Determine if this user should be host
-    if (!currentHost) {
-      // No host exists, make this user the host
-      isHost = true;
-    } else if (requestedHost) {
-      // User requested host but one already exists
-      isHost = false;
-    }
+ // Determine if this user should be host
+// Only promote to host when the client explicitly requested host privileges
+// (e.g. the user explicitly created the room / opened the room as host).
+if (!currentHost && requestedHost) {
+  // No host exists and client explicitly requested host → make them host
+  isHost = true;
+} else {
+  // Either a host already exists, or client did not request host → keep as guest
+  isHost = false;
+}
 
     if (isHost) {
       socket.isHost = true;
