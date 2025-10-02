@@ -5446,6 +5446,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const feedbackBtn = document.getElementById("feedbackBtn");
   const feedbackModal = document.getElementById("feedbackModal");
   const closeFeedback = document.getElementById("closeFeedback");
+  const emojiRow = document.getElementById("emojiRow");
+  let selectedEmoji = null;
 
   feedbackBtn.addEventListener("click", () => {
     feedbackModal.style.display = "flex";
@@ -5455,13 +5457,46 @@ document.addEventListener("DOMContentLoaded", () => {
     feedbackModal.style.display = "none";
   });
 
-  document.getElementById("submitFeedback").addEventListener("click", () => {
+  // Emoji click selection
+  emojiRow.querySelectorAll(".emoji").forEach(emoji => {
+    emoji.addEventListener("click", () => {
+      // remove selection from others
+      emojiRow.querySelectorAll(".emoji").forEach(e => e.classList.remove("selected"));
+      // add selection to clicked
+      emoji.classList.add("selected");
+      selectedEmoji = emoji.textContent;
+    });
+  });
+
+  document.getElementById("submitFeedback").addEventListener("click", async () => {
     const feedback = document.getElementById("feedbackText").value;
     const email = document.getElementById("feedbackEmail").value;
-    console.log("Feedback submitted:", feedback, email);
-    alert("Thanks for your feedback! (email sending will be wired later)");
+
+    if (!feedback.trim() && !selectedEmoji) {
+      alert("Please select an emoji or write feedback.");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emoji: selectedEmoji, feedback, email })
+      });
+
+      if (res.ok) {
+        alert("✅ Thanks for your feedback!");
+      } else {
+        alert("❌ Failed to send feedback.");
+      }
+    } catch (err) {
+      console.error("Error sending feedback:", err);
+      alert("⚠️ Something went wrong.");
+    }
+
     feedbackModal.style.display = "none";
   });
 });
+
 
 // === END FIX ===
