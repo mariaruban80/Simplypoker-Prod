@@ -2818,7 +2818,26 @@ document.getElementById('joinSessionWithName').addEventListener('click', functio
     </div>
   </div>
 </div>
+<!-- Floating Feedback Button -->
+<div id="feedbackBtn">💬</div>
 
+<!-- Feedback Modal -->
+<div id="feedbackModal">
+  <div class="feedback-content">
+    <span class="close-btn" id="closeFeedback">&times;</span>
+    <h3>Rate your experience</h3>
+    <div class="emoji-row">
+      <span class="emoji">😠</span>
+      <span class="emoji">🙁</span>
+      <span class="emoji">😐</span>
+      <span class="emoji">🙂</span>
+      <span class="emoji">😍</span>
+    </div>
+    <textarea id="feedbackText" placeholder="Tell us more..."></textarea>
+    <input type="email" id="feedbackEmail" placeholder="Add your email (optional)">
+    <button id="submitFeedback">Submit</button>
+  </div>
+</div>
 </body>
 </html>
   
