@@ -3400,3 +3400,81 @@ input:checked + .slider:before {
   from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+/* ============================
+   Feedback / Rating Modal Fix
+   ============================ */
+#feedbackModal, 
+.rate-experience-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+#feedbackModal .modal-content,
+.rate-experience-modal .modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 25px 30px;
+  gap: 16px;
+  width: 360px;
+  max-width: 90%;
+  box-sizing: border-box;
+}
+
+.rate-experience-modal h3,
+#feedbackModal h3 {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.rate-experience-modal .emoji-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.rate-experience-modal textarea {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.rate-experience-modal input[type="email"] {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.rate-experience-modal button,
+#feedbackModal button {
+  width: 100%;
+  background-color: #673ab7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.rate-experience-modal button:hover {
+  background-color: #5c33a4;
+}
+
