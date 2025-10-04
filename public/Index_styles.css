@@ -3400,19 +3400,19 @@ input:checked + .slider:before {
   from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-
-
 /* ============================
    Feedback / Rating Modal Fix
    ============================ */
 #feedbackModal, 
 .rate-experience-modal {
-  display: flex;
-  flex-direction: column;
+  display: none; /* hidden by default */
   align-items: center;
   justify-content: center;
-  gap: 12px;
+}
+
+#feedbackModal.active,
+.rate-experience-modal.active {
+  display: flex; /* shown when .active is added */
 }
 
 #feedbackModal .modal-content,
@@ -3480,3 +3480,4 @@ input:checked + .slider:before {
 .rate-experience-modal button:hover {
   background-color: #5c33a4;
 }
+
