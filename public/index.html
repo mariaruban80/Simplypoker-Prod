@@ -28,27 +28,6 @@
   </div>
   <div class="nav-links">    
    <button class="invite-button" id="inviteButton">Invite Others</button>    
-  <!-- Clock / Timer -->
-<button id="timerButton" class="invite-button">
-  <i class="fa-regular fa-clock"></i> Timer
-</button>
-<span id="runningTimer" style="display:none; font-weight:600; color:#673ab7;">0:00</span>
-
-<!-- Timer Modal -->
-<div id="timerModal" class="timer-modal">
-  <div class="timer-modal-content">
-    <h3><i class="fa-regular fa-clock" style="color:#673ab7;"></i> Set Timer</h3>
-    <div class="timer-buttons">
-      <button class="time-option" data-minutes="5">5 min</button>
-      <button class="time-option" data-minutes="10">10 min</button>
-      <button class="time-option" data-minutes="15">15 min</button>
-      <button class="time-option" data-minutes="30">30 min</button>
-      <button class="time-option" data-minutes="60">60 min</button>
-    </div>
-    <button id="startTimerBtn" class="confirm-button">⭐ Start</button>
-    <button id="closeTimerModal" class="cancel-button">Cancel</button>
-  </div>
-</div>
     <!-- New user display element -->
   <div class="current-user-display" id="profileMenuTrigger" style="cursor:pointer;position:relative;">
     <div class="user-avatar" id="headerUserAvatar"></div>
@@ -2783,61 +2762,6 @@ document.getElementById('joinSessionWithName').addEventListener('click', functio
   document.getElementById('loginModalCustom').style.display = 'none';
 });
 </script>
-    // Timer script 
-    <script>
-let selectedMinutes = 0;
-let timerInterval;
-
-const timerButton = document.getElementById('timerButton');
-const timerModal = document.getElementById('timerModal');
-const startTimerBtn = document.getElementById('startTimerBtn');
-const runningTimer = document.getElementById('runningTimer');
-
-timerButton.addEventListener('click', () => {
-  timerModal.style.display = 'flex';
-});
-
-document.getElementById('closeTimerModal').addEventListener('click', () => {
-  timerModal.style.display = 'none';
-  document.querySelectorAll('.time-option').forEach(btn => btn.classList.remove('active'));
-});
-
-document.querySelectorAll('.time-option').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.time-option').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedMinutes = parseInt(btn.dataset.minutes);
-  });
-});
-
-startTimerBtn.addEventListener('click', () => {
-  if (!selectedMinutes) return alert('Please select a duration.');
-  
-  timerModal.style.display = 'none';
-  timerButton.style.display = 'none';
-  runningTimer.style.display = 'inline';
-  
-  let remainingSeconds = selectedMinutes * 60;
-  updateTimerDisplay();
-
-  timerInterval = setInterval(() => {
-    remainingSeconds--;
-    updateTimerDisplay();
-    if (remainingSeconds <= 0) {
-      clearInterval(timerInterval);
-      runningTimer.style.display = 'none';
-      timerButton.style.display = 'inline-flex';
-      alert('⏰ Timer finished!');
-    }
-  }, 1000);
-
-  function updateTimerDisplay() {
-    const minutes = Math.floor(remainingSeconds / 60);
-    const seconds = remainingSeconds % 60;
-    runningTimer.textContent = `${minutes}:${seconds.toString().padStart(2,'0')}`;
-  }
-});
-    </script>
 
 <!-- Translation Loading Overlay (for language-manager.js) -->
 <div id="translationOverlay" style="display:none; position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:10001; background:rgba(0,0,0,0.45); color: white; font-size: 2em; align-items:center;justify-content:center; flex-direction:column;">
