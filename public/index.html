@@ -28,18 +28,26 @@
   </div>
   <div class="nav-links">    
    <button class="invite-button" id="inviteButton">Invite Others</button>    
+        <!-- Clock / Timer -->
+  <div class="timer-container">
+    <span class="clock-icon">⏰</span>
+    <select id="timerSelect">
+      <option value="" disabled selected>Add minutes</option>
+      <option value="5">5 min</option>
+      <option value="10">10 min</option>
+      <option value="15">15 min</option>
+      <option value="30">30 min</option>
+      <option value="60">60 min</option>
+    </select>
+    <span id="timerDisplay">0:00</span>
+  </div>
     <!-- New user display element -->
   <div class="current-user-display" id="profileMenuTrigger" style="cursor:pointer;position:relative;">
     <div class="user-avatar" id="headerUserAvatar"></div>
     <span id="headerUsername">User</span>
     
   </div>
-        <div class="timer-container">
-    <input type="number" id="timerInput" min="1" placeholder="Minutes">
-    <button id="addMinutesBtn">Add</button>
-    <span id="currentTimer">0 min</span>
-  </div>
-</div>
+     </div>
    </div>
       <!-- Profile Dropdown Menu -->
 <div id="profileMenu" class="profile-menu">
