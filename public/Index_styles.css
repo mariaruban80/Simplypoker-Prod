@@ -1265,7 +1265,7 @@ body::-webkit-scrollbar {
   font-size: 14px;
 }
 
-/* Story Points Badge */
+/* Story Points Badge 
 .story-points {
   background: linear-gradient(135deg, #10b981, #059669);
   color: white;
@@ -1283,7 +1283,7 @@ body::-webkit-scrollbar {
 .story-points:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
-}
+}*/
 
 /* 3-Dot Menu */
 .story-actions {
