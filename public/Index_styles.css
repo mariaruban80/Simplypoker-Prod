@@ -3652,29 +3652,21 @@ input:checked + .slider:before {
   gap: 8px;
 }
 
-#timerInput {
-  width: 60px;
+.clock-icon {
+  font-size: 20px;
+}
+
+#timerSelect {
   padding: 6px 8px;
   border-radius: 8px;
   border: 1px solid #ccc;
   font-size: 14px;
 }
 
-#addMinutesBtn {
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: none;
-  background-color: #673ab7;
-  color: white;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-#addMinutesBtn:hover {
-  background-color: #5c33a4;
-}
-
-#currentTimer {
+#timerDisplay {
   font-weight: 600;
   color: #333;
+  min-width: 50px;
+  text-align: center;
 }
+
