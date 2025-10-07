@@ -3636,3 +3636,45 @@ input:checked + .slider:before {
 .feedback-modal .feedback-content .submit-button:hover {
   background: #5c33a4;
 }
+
+/* Timer clock CSS */
+
+.invite-top-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.timer-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#timerInput {
+  width: 60px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+#addMinutesBtn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  background-color: #673ab7;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#addMinutesBtn:hover {
+  background-color: #5c33a4;
+}
+
+#currentTimer {
+  font-weight: 600;
+  color: #333;
+}
