@@ -2775,6 +2775,45 @@ document.getElementById('joinSessionWithName').addEventListener('click', functio
   document.getElementById('loginModalCustom').style.display = 'none';
 });
 </script>
+    <script>
+const timerSelect = document.getElementById('timerSelect');
+const timerDisplay = document.getElementById('timerDisplay');
+
+let remainingTime = 0; // in seconds
+let countdownInterval = null;
+
+function updateTimerDisplay() {
+  const minutes = Math.floor(remainingTime / 60);
+  const seconds = remainingTime % 60;
+  timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+timerSelect.addEventListener('change', () => {
+  const minutesToAdd = parseInt(timerSelect.value, 10);
+  if (!isNaN(minutesToAdd)) {
+    remainingTime += minutesToAdd * 60;
+    updateTimerDisplay();
+    
+    // Start countdown if not already running
+    if (!countdownInterval) {
+      countdownInterval = setInterval(() => {
+        if (remainingTime > 0) {
+          remainingTime--;
+          updateTimerDisplay();
+        } else {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+        }
+      }, 1000);
+    }
+    
+    // Reset select
+    timerSelect.selectedIndex = 0;
+  }
+});
+
+        
+    </script>
 
 <!-- Translation Loading Overlay (for language-manager.js) -->
 <div id="translationOverlay" style="display:none; position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:10001; background:rgba(0,0,0,0.45); color: white; font-size: 2em; align-items:center;justify-content:center; flex-direction:column;">
