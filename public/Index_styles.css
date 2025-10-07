@@ -3644,7 +3644,7 @@ input:checked + .slider:before {
 
 .story-points {
   position: absolute;
-  right: 2px;
+  right: -1px;
   
   background: linear-gradient(135deg, #673ab7, #8b5cf6); /* Match app theme */
   color: white;
