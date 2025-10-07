@@ -3480,85 +3480,105 @@ input:checked + .slider:before {
 .rate-experience-modal button:hover {
   background-color: #5c33a4;
 }
-/* 🎯 Fix spacing and layout for Rate Your Experience modal */
+/* 🌟 FINAL FIX: Rate Your Experience modal spacing + polish */
+#feedbackModal,
+.feedback-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 10000;
+}
+
 #feedbackModal .modal-content,
 .feedback-modal .modal-content {
-  padding: 25px 30px !important;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  background: #ffffff;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 420px;
+  padding: 30px 32px 28px 32px !important; /* ✅ adds space around textarea */
   box-sizing: border-box;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  text-align: center;
 }
 
 #feedbackModal .modal-content h3,
 .feedback-modal .modal-content h3 {
-  margin-top: 0;
-  margin-bottom: 20px;
-  text-align: center;
   color: #673ab7;
-  font-size: 20px;
   font-weight: 600;
+  font-size: 20px;
+  margin-bottom: 20px;
 }
 
 #feedbackModal .modal-content textarea,
 .feedback-modal .modal-content textarea {
   width: 100%;
-  height: 100px;
+  height: 110px;
   border: 1px solid #d0d0d0;
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 12px 14px;
-  margin-top: 10px;
-  margin-bottom: 20px;
+  margin: 10px 0 25px 0; /* ✅ extra space below text box */
   box-sizing: border-box;
   font-size: 14px;
   resize: none;
-  transition: all 0.2s ease;
+  line-height: 1.4;
+  background: #fafafa;
 }
 
 #feedbackModal .modal-content textarea:focus,
 .feedback-modal .modal-content textarea:focus {
-  border-color: #673ab7;
-  box-shadow: 0 0 0 2px rgba(103, 58, 183, 0.2);
   outline: none;
+  border-color: #673ab7;
+  box-shadow: 0 0 0 2px rgba(103, 58, 183, 0.15);
+  background: #fff;
 }
 
+/* Button layout */
 #feedbackModal .modal-content .button-group,
 .feedback-modal .modal-content .button-group {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 12px;
 }
 
-#feedbackModal .modal-content button,
-.feedback-modal .modal-content button {
+#feedbackModal .modal-content .button-group button,
+.feedback-modal .modal-content .button-group button {
   flex: 1;
-  padding: 10px 0;
   border-radius: 25px;
+  padding: 10px 0;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-#feedbackModal .modal-content .cancel-button {
-  background: #f3f3f3;
-  color: #555;
+/* Cancel */
+#feedbackModal .modal-content .cancel-button,
+.feedback-modal .modal-content .cancel-button {
+  background: #f4f4f4;
   border: 1px solid #ccc;
+  color: #555;
 }
 
-#feedbackModal .modal-content .cancel-button:hover {
+#feedbackModal .modal-content .cancel-button:hover,
+.feedback-modal .modal-content .cancel-button:hover {
   background: #e0e0e0;
 }
 
-#feedbackModal .modal-content .confirm-button,
-#feedbackModal .modal-content .submit-button {
+/* Submit */
+#feedbackModal .modal-content .submit-button,
+.feedback-modal .modal-content .submit-button {
   background: #673ab7;
   color: white;
   border: none;
 }
 
-#feedbackModal .modal-content .confirm-button:hover,
-#feedbackModal .modal-content .submit-button:hover {
+#feedbackModal .modal-content .submit-button:hover,
+.feedback-modal .modal-content .submit-button:hover {
   background: #5c33a4;
 }
