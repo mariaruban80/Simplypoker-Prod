@@ -3524,3 +3524,25 @@ input:checked + .slider:before {
   width: 100%;
   box-sizing: border-box;
 }
+/* 🔧 Universal fix for rightbar alignment issues */
+.rightbar,
+.story-container,
+.modal-content,
+.add-ticket-modal,
+.csv-modal-content,
+.export-section {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+.rightbar input,
+.rightbar textarea,
+.modal-content input,
+.modal-content textarea {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
